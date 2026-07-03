@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.env
+.env.local
+.env.production
+dist/
+build/
+*.log
+.DS_Store
+coverage/
+
+# Prisma
+backend/src/generated/
+prisma/migrations/
+
+# TypeScript
+*.tsbuildinfo

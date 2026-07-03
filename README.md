@@ -20,7 +20,6 @@ Point of Sale system built with Next.js.
 
 ```
 loukdo/
-├── docker-compose.yml                 # PostgreSQL service
 ├── package.json                       # npm workspaces root
 ├── .env                               # Environment variables
 ├── .gitignore
@@ -72,9 +71,9 @@ loukdo/
 
 ### Prerequisites
 
-- Node.js >= 18
-- Docker (for PostgreSQL)
-- npm
+- **Node.js** >= 18
+- **PostgreSQL** 16 (running locally on port 5432)
+- **npm**
 
 ### 1. Install dependencies
 
@@ -82,30 +81,43 @@ loukdo/
 npm install
 ```
 
-### 2. Start PostgreSQL
+### 2. Crep te the database
+
+Connect to PostgreSQL and create the database and user:
 
 ```bash
-docker compose up -d
+# macOS (Homebrew) — start PostgreSQL if not running
+brew services start postgresql@16
+
+# Create the database user and database
+psql postgres -c "CREATE USER loukdo WITH PASSWORD '112233';"
+psql postgres -c "CREATE DATABASE loukdo OWNER loukdo;"
 ```
+
+> **Linux (systemd):** replace `brew services start` with `sudo systemctl start postgresql-16`
 
 ### 3. Set environment variables
 
-Edit `.env` in the root directory:
+The `.env` file at the project root is pre-configured:
 
 ```env
-DATABASE_URL="postgresql://loukdo:loukdo@localhost:5432/loukdo?schema=public"
-AUTH_SECRET="generate-a-random-secret-at-least-32-chars"
+DATABASE_URL="postgresql://loukdo:112233@localhost:5432/loukdo?schema=public"
+AUTH_SECRET="1QAqagR0rQGtrgN0UIQyfRLi+GHqHHpZoRWQz4KtltA="
 ```
 
-Generate a secure `AUTH_SECRET`:
+To generate a new `AUTH_SECRET` (optional):
 
 ```bash
 openssl rand -base64 32
 ```
 
-### 4. Push database schema
+### 4. Generate Prisma client & push schema
 
 ```bash
+# Generate the Prisma client from the schema
+npm run -w backend db:generate
+
+# Push the schema to PostgreSQL (creates tables)
 npm run -w backend db:push
 ```
 
@@ -115,7 +127,7 @@ npm run -w backend db:push
 npm run -w frontend dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) — you will be redirected to the login page.
 
 ### 6. (Optional) Open Prisma Studio
 

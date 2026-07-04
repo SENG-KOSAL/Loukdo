@@ -1,9 +1,18 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Button, Container, TextField, Typography, Box, Paper } from "@mui/material"
-import { signIn } from "next-auth/react"
 import { useRouter, useParams } from "next/navigation"
+import { signIn } from "next-auth/react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 export default function BranchLoginPage() {
   const router = useRouter()
@@ -38,27 +47,29 @@ export default function BranchLoginPage() {
   }
 
   return (
-    <Container maxWidth="xs">
-      <Box sx={{ mt: 8, display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <Paper sx={{ p: 4, width: "100%" }}>
-          <Typography component="h1" variant="h5" sx={{ mb: 1 }}>
-            {branch ? branch.name : "Loading..."}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Branch sign in
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit}>
-            <TextField label="Username" type="text" fullWidth margin="normal"
-              value={username} onChange={(e) => setUsername(e.target.value)} required />
-            <TextField label="Password" type="password" fullWidth margin="normal"
-              value={password} onChange={(e) => setPassword(e.target.value)} required />
-            {error && <Typography color="error" variant="body2" sx={{ mt: 1 }}>{error}</Typography>}
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
-              Sign In
-            </Button>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">{branch ? branch.name : "Loading..."}</CardTitle>
+          <CardDescription>Branch sign in</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input id="username" type="text" value={username}
+                onChange={(e) => setUsername(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" type="password" value={password}
+                onChange={(e) => setPassword(e.target.value)} required />
+            </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" className="w-full">Sign In</Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

@@ -15,6 +15,8 @@ model User {
   email     String   @unique
   password  String
   role      Role     @default(STAFF)
+  branchId  String?
+  branch    Branch?  @relation(fields: [branchId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -27,8 +29,19 @@ model Branch {
   adminName  String?
   adminEmail String?
   status     BranchStatus @default(ACTIVE)
+  users      User[]
+  sales      Sale[]
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
+}
+
+model Sale {
+  id        String   @id @default(cuid())
+  branchId  String
+  branch    Branch   @relation(fields: [branchId], references: [id])
+  total     Decimal  @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {

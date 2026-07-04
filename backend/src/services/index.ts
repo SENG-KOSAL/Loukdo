@@ -1,2 +1,5 @@
 export { default as prisma } from "./prisma"
 export * from "./branch"
+export * from "./user"
+export * from "./sale"
+export * from "./password"

@@ -22,8 +22,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const branch = await createBranch(parsed.data)
-    return NextResponse.json(branch, { status: 201 })
+    const result = await createBranch(parsed.data)
+    return NextResponse.json(result, { status: 201 })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to create branch"
     return NextResponse.json({ error: message }, { status: 409 })

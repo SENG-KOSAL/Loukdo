@@ -13,10 +13,10 @@ export const registerSchema = z.object({
 
 export const createBranchSchema = z.object({
   name: z.string().min(1, "Branch name is required"),
-  code: z.string().min(1, "Branch code is required"),
+  code: z.string().optional(),
   url: z.string().optional(),
-  adminName: z.string().optional(),
-  adminEmail: z.string().email().optional().or(z.literal("")),
+  adminUsername: z.string().min(1, "Admin username is required"),
+  adminPassword: z.string().min(6, "Password must be at least 6 characters"),
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]).default("ACTIVE"),
 })
 

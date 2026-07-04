@@ -7,13 +7,13 @@ import { useState } from "react"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const result = await signIn("credentials", { email, password, redirect: false })
+    const result = await signIn("credentials", { username, password, redirect: false })
     if (result?.error) {
       setError("Invalid credentials")
     } else {
@@ -30,12 +30,12 @@ export default function LoginPage() {
           </Typography>
           <Box component="form" onSubmit={handleSubmit}>
             <TextField
-              label="Email"
-              type="email"
+              label="Username"
+              type="text"
               fullWidth
               margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
             <TextField

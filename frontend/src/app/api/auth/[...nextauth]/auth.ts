@@ -7,13 +7,13 @@ export const authConfig: NextAuthConfig = {
   providers: [
     Credentials({
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         // TODO: call backend service to validate credentials
-        if (credentials?.email === "admin@loukdo.com" && credentials?.password === "admin") {
-          return { id: "1", name: "Admin", email: "admin@loukdo.com" }
+        if (credentials?.username === "admin" && credentials?.password === "admin") {
+          return { id: "1", name: "Admin", username: "admin", email: "admin@loukdo.com" }
         }
         return null
       },
@@ -23,6 +23,18 @@ export const authConfig: NextAuthConfig = {
     signIn: "/login",
   },
   callbacks: {
+    jwt({ token, user }) {
+      if (user) {
+        token.username = user.username
+      }
+      return token
+    },
+    session({ session, token }) {
+      if (token.username) {
+        session.user.username = token.username
+      }
+      return session
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
       const isOnDashboard = nextUrl.pathname.startsWith("/dashboard")

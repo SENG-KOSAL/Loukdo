@@ -47,7 +47,7 @@ loukdo/
         │   ├── layout.tsx             # Root layout (MUI + Auth providers)
         │   ├── page.tsx               # Redirect to login/dashboard
         │   ├── (auth)/
-        │   │   ├── login/page.tsx     # Sign-in page
+        │   │   ├── login/page.tsx     # Sign-in page (username + password)
         │   │   └── register/page.tsx  # Registration page
         │   ├── (dashboard)/
         │   │   └── page.tsx           # Protected dashboard
@@ -111,15 +111,17 @@ To generate a new `AUTH_SECRET` (optional):
 openssl rand -base64 32
 ```
 
-### 4. Generate Prisma client & push schema
+### 4. Generate Prisma client & apply migrations
 
 ```bash
 # Generate the Prisma client from the schema
 npm run -w backend db:generate
 
-# Push the schema to PostgreSQL (creates tables)
-npm run -w backend db:push
+# Create and apply migrations (creates/updates tables)
+npm run -w backend db:migrate
 ```
+
+> **Note:** If you've pulled changes that modify the database schema (e.g. added a `username` field), run `npm run -w backend db:migrate` (or `npx prisma migrate dev` in the `backend/` directory) to keep your database in sync.
 
 ### 5. Run the dev server
 
@@ -127,7 +129,7 @@ npm run -w backend db:push
 npm run -w frontend dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — you will be redirected to the login page.
+Open [http://localhost:3000](http://localhost:3000) — you will be redirected to the login page. Sign in with username `admin` and password `admin` (hardcoded stub).
 
 ### 6. (Optional) Open Prisma Studio
 

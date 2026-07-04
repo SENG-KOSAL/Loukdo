@@ -1,10 +1,11 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import type { NextAuthConfig } from "next-auth"
 import prisma from "@loukdo/backend/services/prisma"
 import { verify } from "@/lib/password"
+import { authConfig } from "./auth.config"
 
-export const authConfig: NextAuthConfig = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   secret: process.env.AUTH_SECRET,
   providers: [
     Credentials({
@@ -43,9 +44,6 @@ export const authConfig: NextAuthConfig = {
       },
     }),
   ],
-  pages: {
-    signIn: "/login",
-  },
   callbacks: {
     jwt({ token, user }) {
       if (user) {
@@ -59,13 +57,5 @@ export const authConfig: NextAuthConfig = {
       const t = token as { username?: string; role?: string; branchId?: string }
       return { ...session, user: { ...session.user, ...t } }
     },
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user
-      const isOnDashboard = nextUrl.pathname.startsWith("/dashboard")
-      if (isOnDashboard && !isLoggedIn) return false
-      return true
-    },
   },
-}
-
-export const { handlers, auth, signIn, signOut } = NextAuth(authConfig)
+})

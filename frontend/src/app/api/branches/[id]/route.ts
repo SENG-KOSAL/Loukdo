@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/app/api/auth/[...nextauth]/auth"
-import { getBranch, deleteBranch, duplicateBranch } from "@loukdo/backend/services/branch"
+import { getAllBranches, getBranch, deleteBranch, duplicateBranch } from "@loukdo/backend/services/branch"
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()

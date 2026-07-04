@@ -1,17 +1,24 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { Plus, Copy, Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
-  Box, Button, Dialog, DialogTitle, DialogContent, DialogActions,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, TextField, Typography, MenuItem, Select, InputLabel, FormControl,
-  Chip, Divider, IconButton, Tooltip,
-} from "@mui/material"
-import AddIcon from "@mui/icons-material/Add"
-import DeleteIcon from "@mui/icons-material/Delete"
-import ContentCopyIcon from "@mui/icons-material/ContentCopy"
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
+import {
+  Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 import DashboardLayout from "@/components/layouts/DashboardLayout"
 import { apiClient } from "@/lib/api-client"
+import { cn } from "@/lib/utils"
 
 interface Branch {
   id: string
@@ -36,16 +43,16 @@ interface CreateResult {
   adminUsername: string | null
 }
 
-const statusColor: Record<string, "success" | "default" | "warning"> = {
-  ACTIVE: "success",
-  INACTIVE: "default",
-  SUSPENDED: "warning",
-}
-
 const statusLabel: Record<string, string> = {
   ACTIVE: "Active",
   INACTIVE: "Inactive",
   SUSPENDED: "Suspended",
+}
+
+const statusBadge: Record<string, string> = {
+  ACTIVE: "bg-green-100 text-green-800 hover:bg-green-100",
+  INACTIVE: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+  SUSPENDED: "bg-red-100 text-red-800 hover:bg-red-100",
 }
 
 export default function BranchesPage() {
@@ -133,40 +140,45 @@ export default function BranchesPage() {
 
   return (
     <DashboardLayout>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h5">Branches</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)}>
-          Create Branch
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold">Branches</h1>
+        <Button onClick={() => setOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" /> Create Branch
         </Button>
-      </Box>
+      </div>
 
-      <TableContainer component={Paper}>
+      <div className="rounded-md border">
         <Table>
-          <TableHead>
+          <TableHeader>
             <TableRow>
-              <TableCell>Code</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Login URL</TableCell>
-              <TableCell>Admin</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableHead>Code</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Login URL</TableHead>
+              <TableHead>Admin</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             {branches.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">No branches yet.</TableCell>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  No branches yet.
+                </TableCell>
               </TableRow>
             ) : (
               branches.map((b) => (
-                <TableRow key={b.id} hover onClick={() => setDetail(b)}
-                  sx={{ cursor: "pointer" }}>
-                  <TableCell>{b.code}</TableCell>
+                <TableRow
+                  key={b.id}
+                  className="cursor-pointer"
+                  onClick={() => setDetail(b)}
+                >
+                  <TableCell className="font-mono text-xs">{b.code}</TableCell>
                   <TableCell>{b.name}</TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.8rem" }}>
+                    <span className="font-mono text-xs text-muted-foreground">
                       /branch/{b.code}/login
-                    </Typography>
+                    </span>
                   </TableCell>
                   <TableCell>
                     {b.users.length > 0
@@ -174,157 +186,210 @@ export default function BranchesPage() {
                       : b.adminName || "-"}
                   </TableCell>
                   <TableCell>
-                    <Chip label={statusLabel[b.status]} color={statusColor[b.status]} size="small" />
+                    <Badge className={cn("font-normal", statusBadge[b.status])}>
+                      {statusLabel[b.status]}
+                    </Badge>
                   </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Duplicate">
-                      <IconButton size="small" onClick={(e) => { e.stopPropagation(); openDuplicate(b) }}>
-                        <ContentCopyIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <IconButton size="small" onClick={(e) => { e.stopPropagation(); setDeleteTarget(b) }}>
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost" size="icon"
+                      onClick={(e) => { e.stopPropagation(); openDuplicate(b) }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost" size="icon"
+                      onClick={(e) => { e.stopPropagation(); setDeleteTarget(b) }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
-      </TableContainer>
+      </div>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create Branch</DialogTitle>
+      {/* Create Dialog */}
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-            <TextField label="Branch Name" required fullWidth value={form.name}
-              onChange={(e) => updateName(e.target.value)} />
-            <TextField label="Branch Code" fullWidth value={form.code}
-              slotProps={{ input: { readOnly: true } }} helperText="Auto-generated from branch name" />
-            <TextField label="URL / Subdomain" fullWidth value={form.url}
-              slotProps={{ input: { readOnly: true } }} helperText="Auto-generated from branch name" />
-            <TextField label="Admin Username" required fullWidth value={form.adminUsername}
-              onChange={(e) => setForm({ ...form, adminUsername: e.target.value })} />
-            <TextField label="Admin Password" type="password" required fullWidth value={form.adminPassword}
-              onChange={(e) => setForm({ ...form, adminPassword: e.target.value })} />
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select label="Status" value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}>
-                <MenuItem value="ACTIVE">Active</MenuItem>
-                <MenuItem value="INACTIVE">Inactive</MenuItem>
-                <MenuItem value="SUSPENDED">Suspended</MenuItem>
+          <DialogHeader>
+            <DialogTitle>Create Branch</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="name">Branch Name <span className="text-destructive">*</span></Label>
+              <Input id="name" value={form.name} onChange={(e) => updateName(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="code">Branch Code</Label>
+              <Input id="code" value={form.code} readOnly className="bg-muted" />
+              <p className="text-xs text-muted-foreground">Auto-generated from branch name</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="url">URL / Subdomain</Label>
+              <Input id="url" value={form.url} readOnly className="bg-muted" />
+              <p className="text-xs text-muted-foreground">Auto-generated from branch name</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="adminUsername">Admin Username <span className="text-destructive">*</span></Label>
+              <Input id="adminUsername" value={form.adminUsername}
+                onChange={(e) => setForm({ ...form, adminUsername: e.target.value })} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="adminPassword">Admin Password <span className="text-destructive">*</span></Label>
+              <Input id="adminPassword" type="password" value={form.adminPassword}
+                onChange={(e) => setForm({ ...form, adminPassword: e.target.value })} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select value={form.status ?? "ACTIVE"} onValueChange={(v) => setForm({ ...form, status: v ?? "ACTIVE" })}>
+                <SelectTrigger id="status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVE">Active</SelectItem>
+                  <SelectItem value="INACTIVE">Inactive</SelectItem>
+                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                </SelectContent>
               </Select>
-            </FormControl>
-          </Box>
-          {error && <Typography color="error" variant="body2" sx={{ mt: 1 }}>{error}</Typography>}
+            </div>
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreate}
+              disabled={!form.name || !form.adminUsername || !form.adminPassword}>
+              Create
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreate} disabled={!form.name || !form.adminUsername || !form.adminPassword}>
-            Create
-          </Button>
-        </DialogActions>
       </Dialog>
 
-      <Dialog open={!!credentials} onClose={() => setCredentials(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>Branch Created</DialogTitle>
+      {/* Credentials Dialog */}
+      <Dialog open={!!credentials} onOpenChange={(o) => { if (!o) setCredentials(null) }}>
         <DialogContent>
-          <Typography variant="h6" gutterBottom>{credentials?.name}</Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Login URL: <strong>/branch/{credentials?.code}/login</strong>
-          </Typography>
-          {credentials?.adminUsername && (
-            <Paper variant="outlined" sx={{ p: 2, bgcolor: "grey.50" }}>
-              <Typography variant="subtitle2" gutterBottom>Admin Credentials</Typography>
-              <Typography variant="body2">Username: <strong>{credentials.adminUsername}</strong></Typography>
-              <Typography variant="body2">Password: <strong>{credentials.adminPassword}</strong></Typography>
-            </Paper>
-          )}
+          <DialogHeader>
+            <DialogTitle>Branch Created</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="font-semibold text-lg">{credentials?.name}</p>
+            <p className="text-sm">
+              Login URL: <span className="font-mono font-semibold">/branch/{credentials?.code}/login</span>
+            </p>
+            {credentials?.adminUsername && (
+              <div className="rounded-md border bg-muted/50 p-3 space-y-1 text-sm">
+                <p className="font-medium">Admin Credentials</p>
+                <p>Username: <span className="font-semibold">{credentials.adminUsername}</span></p>
+                <p>Password: <span className="font-semibold">{credentials.adminPassword}</span></p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setCredentials(null)}>Done</Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button variant="contained" onClick={() => setCredentials(null)}>Done</Button>
-        </DialogActions>
       </Dialog>
 
-      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
-        <DialogTitle>Delete Branch</DialogTitle>
+      {/* Delete Confirm Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(o) => { if (!o) setDeleteTarget(null) }}>
         <DialogContent>
-          <Typography>Are you sure you want to delete <strong>{deleteTarget?.name}</strong>?</Typography>
-          <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+          <DialogHeader>
+            <DialogTitle>Delete Branch</DialogTitle>
+          </DialogHeader>
+          <p>Are you sure you want to delete <span className="font-semibold">{deleteTarget?.name}</span>?</p>
+          <p className="text-sm text-destructive">
             This will also remove all users and sales data for this branch.
-          </Typography>
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={handleDelete}>Delete</Button>
-        </DialogActions>
       </Dialog>
 
-      <Dialog open={!!duplicateTarget} onClose={() => setDuplicateTarget(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>Duplicate Branch</DialogTitle>
+      {/* Duplicate Dialog */}
+      <Dialog open={!!duplicateTarget} onOpenChange={(o) => { if (!o) setDuplicateTarget(null) }}>
         <DialogContent>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-            <TextField label="Branch Name" required fullWidth value={dupForm.name}
-              onChange={(e) => setDupForm({ ...dupForm, name: e.target.value })} />
-            <TextField label="Admin Username" required fullWidth value={dupForm.adminUsername}
-              onChange={(e) => setDupForm({ ...dupForm, adminUsername: e.target.value })} />
-            <TextField label="Admin Password" type="password" required fullWidth value={dupForm.adminPassword}
-              onChange={(e) => setDupForm({ ...dupForm, adminPassword: e.target.value })} />
-          </Box>
+          <DialogHeader>
+            <DialogTitle>Duplicate Branch</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="dup-name">Branch Name <span className="text-destructive">*</span></Label>
+              <Input id="dup-name" value={dupForm.name}
+                onChange={(e) => setDupForm({ ...dupForm, name: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dup-username">Admin Username <span className="text-destructive">*</span></Label>
+              <Input id="dup-username" value={dupForm.adminUsername}
+                onChange={(e) => setDupForm({ ...dupForm, adminUsername: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="dup-password">Admin Password <span className="text-destructive">*</span></Label>
+              <Input id="dup-password" type="password" value={dupForm.adminPassword}
+                onChange={(e) => setDupForm({ ...dupForm, adminPassword: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDuplicateTarget(null)}>Cancel</Button>
+            <Button onClick={handleDuplicate}
+              disabled={!dupForm.name || !dupForm.adminUsername || !dupForm.adminPassword}>
+              Duplicate
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDuplicateTarget(null)}>Cancel</Button>
-          <Button variant="contained" onClick={handleDuplicate}
-            disabled={!dupForm.name || !dupForm.adminUsername || !dupForm.adminPassword}>
-            Duplicate
-          </Button>
-        </DialogActions>
       </Dialog>
 
-      <Dialog open={!!detail} onClose={() => setDetail(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>Branch Details</DialogTitle>
+      {/* Detail Dialog */}
+      <Dialog open={!!detail} onOpenChange={(o) => { if (!o) setDetail(null) }}>
         <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Branch Details</DialogTitle>
+          </DialogHeader>
           {detail && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <Typography variant="h6">{detail.name}</Typography>
-                <Chip label={statusLabel[detail.status]} color={statusColor[detail.status]} size="small" />
-              </Box>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-lg font-semibold">{detail.name}</p>
+                <Badge className={cn("font-normal", statusBadge[detail.status])}>
+                  {statusLabel[detail.status]}
+                </Badge>
+              </div>
 
-              <Divider />
+              <Separator />
 
-              <Typography variant="subtitle2" color="text.secondary">Branch Info</Typography>
-              <Typography variant="body2"><strong>Code:</strong> {detail.code}</Typography>
-              <Typography variant="body2"><strong>URL:</strong> {detail.url || "-"}</Typography>
-              <Typography variant="body2">
-                <strong>Login:</strong> /branch/{detail.code}/login
-              </Typography>
-              <Typography variant="body2">
-                <strong>Created:</strong> {new Date(detail.createdAt).toLocaleDateString()}
-              </Typography>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Branch Info</p>
+                <div className="text-sm space-y-1">
+                  <p><span className="font-medium">Code:</span> {detail.code}</p>
+                  <p><span className="font-medium">URL:</span> {detail.url || "-"}</p>
+                  <p><span className="font-medium">Login:</span> /branch/{detail.code}/login</p>
+                  <p><span className="font-medium">Created:</span> {new Date(detail.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
 
-              <Divider />
+              <Separator />
 
-              <Typography variant="subtitle2" color="text.secondary">Admin Account</Typography>
-              {detail.users.length > 0 ? (
-                detail.users.map((u) => (
-                  <Box key={u.username}>
-                    <Typography variant="body2"><strong>Username:</strong> {u.username}</Typography>
-                    <Typography variant="body2"><strong>Email:</strong> {u.email}</Typography>
-                  </Box>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary">No admin created yet</Typography>
-              )}
-            </Box>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Admin Account</p>
+                {detail.users.length > 0 ? (
+                  detail.users.map((u) => (
+                    <div key={u.username} className="text-sm space-y-1">
+                      <p><span className="font-medium">Username:</span> {u.username}</p>
+                      <p><span className="font-medium">Email:</span> {u.email}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No admin created yet</p>
+                )}
+              </div>
+            </div>
           )}
+          <DialogFooter>
+            <Button onClick={() => setDetail(null)}>Close</Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button variant="contained" onClick={() => setDetail(null)}>Close</Button>
-        </DialogActions>
       </Dialog>
     </DashboardLayout>
   )

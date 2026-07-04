@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/app/api/auth/[...nextauth]/auth"
-import { getAllBranches, createBranch } from "@loukdo/backend/services/branch"
+import prisma from "@loukdo/backend/services/prisma"
+import { getAllBranches, createBranch, getBranch } from "@loukdo/backend/services/branch"
 import { createBranchSchema } from "@loukdo/backend/validators"
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { searchParams } = new URL(request.url)
+  const code = searchParams.get("code")
+  if (code) {
+    const branch = await prisma.branch.findUnique({ where: { code } })
+    if (!branch) return NextResponse.json({ error: "Branch not found" }, { status: 404 })
+    return NextResponse.json(branch)
+  }
 
   const branches = await getAllBranches()
   return NextResponse.json(branches)

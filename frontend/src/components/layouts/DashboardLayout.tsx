@@ -7,6 +7,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard"
 import InventoryIcon from "@mui/icons-material/Inventory"
 import PeopleIcon from "@mui/icons-material/People"
 import ReceiptIcon from "@mui/icons-material/Receipt"
+import BusinessIcon from "@mui/icons-material/Business"
 import { useAppStore } from "@/stores"
 import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
@@ -20,6 +21,7 @@ const navItems = [
   { label: "Products", icon: <InventoryIcon />, href: "/dashboard/products" },
   { label: "Orders", icon: <ReceiptIcon />, href: "/dashboard/orders" },
   { label: "Customers", icon: <PeopleIcon />, href: "/dashboard/customers" },
+  { label: "Branches", icon: <BusinessIcon />, href: "/dashboard/admin/branches" },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

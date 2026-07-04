@@ -28,11 +28,14 @@ loukdo/
 │   ├── package.json
 │   ├── tsconfig.json
 │   ├── prisma/
-│   │   └── schema.prisma              # Database models
+│   │   └── schema.prisma              # Database models (User, Branch, Role)
 │   └── src/
 │       ├── index.ts                   # Barrel exports
 │       ├── generated/prisma/          # Prisma client (gitignored)
-│       ├── services/                  # Business logic
+│       ├── services/
+│       │   ├── index.ts               # Re-exports
+│       │   ├── prisma.ts              # PrismaClient singleton
+│       │   └── branch.ts              # Branch CRUD
 │       ├── validators/                # Zod validation schemas
 │       └── types/                     # Shared TypeScript types
 │
@@ -50,11 +53,16 @@ loukdo/
         │   │   ├── login/page.tsx     # Sign-in page (username + password)
         │   │   └── register/page.tsx  # Registration page
         │   ├── (dashboard)/
-        │   │   └── page.tsx           # Protected dashboard
+        │   │   ├── page.tsx           # Protected dashboard
+        │   │   └── admin/
+        │   │       └── branches/
+        │   │           └── page.tsx   # Branch management (admin)
         │   └── api/
-        │       └── auth/[...nextauth]/
-        │           ├── auth.ts        # NextAuth config
-        │           └── route.ts       # Auth API handlers
+                │       ├── auth/[...nextauth]/
+        │       │   ├── auth.ts        # NextAuth config
+        │       │   └── route.ts       # Auth API handlers
+        │       └── branches/
+        │           └── route.ts       # Branches API (GET list, POST create)
         ├── components/
         │   ├── providers/
         │   │   ├── ThemeRegistry.tsx  # MUI theme & cache
@@ -121,7 +129,7 @@ npm run -w backend db:generate
 npm run -w backend db:migrate
 ```
 
-> **Note:** If you've pulled changes that modify the database schema (e.g. added a `username` field), run `npm run -w backend db:migrate` (or `npx prisma migrate dev` in the `backend/` directory) to keep your database in sync.
+> **Note:** If you've pulled changes that modify the database schema (e.g. added a `username` or `Branch` model), run `npm run -w backend db:migrate` (or `npx prisma migrate dev` in the `backend/` directory) to keep your database in sync.
 
 ### 5. Run the dev server
 
@@ -158,3 +166,7 @@ npm run -w backend db:studio
 | `build`   | Build for production      |
 | `start`   | Start production server   |
 | `lint`    | Run Next.js lint          |
+
+
+after create new schema 
+npm run -w backend db:push

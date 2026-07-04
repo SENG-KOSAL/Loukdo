@@ -13,9 +13,11 @@ export const registerSchema = z.object({
 
 export const createBranchSchema = z.object({
   name: z.string().min(1, "Branch name is required"),
-  address: z.string().optional(),
-  phone: z.string().optional(),
   code: z.string().min(1, "Branch code is required"),
+  url: z.string().optional(),
+  adminName: z.string().optional(),
+  adminEmail: z.string().email().optional().or(z.literal("")),
+  status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]).default("ACTIVE"),
 })
 
 export type BranchInput = z.infer<typeof createBranchSchema>

@@ -28,12 +28,12 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError("")
-    const result = await signIn("credentials", { username, password, redirect: false })
+    const result = await signIn("credentials", { username, password, loginType: "admin", redirect: false })
     if (result?.error) {
       setError("Invalid username or password")
       setLoading(false)
     } else {
-      router.push("/dashboard/admin/branches")
+      router.push("/dashboard/admin")
     }
   }
 

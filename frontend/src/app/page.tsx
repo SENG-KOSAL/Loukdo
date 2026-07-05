@@ -3,6 +3,6 @@ import { auth } from "@/app/api/auth/[...nextauth]/auth"
 
 export default async function HomePage() {
   const session = await auth()
-  if (session?.user) redirect("/dashboard/admin/branches")
+  if (session?.user) redirect("/dashboard/admin")
   redirect("/login")
 }

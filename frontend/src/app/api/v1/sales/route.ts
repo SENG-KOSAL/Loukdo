@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/app/api/v1/auth/[...nextauth]/auth"
+import { auth } from "@/app/api/auth/[...nextauth]/auth"
 import { getSalesByBranch, createSale } from "@loukdo/backend/services/sale"
 
 export async function GET() {

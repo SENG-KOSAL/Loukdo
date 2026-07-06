@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/app/api/v1/auth/[...nextauth]/auth"
+import { auth } from "@/app/api/auth/[...nextauth]/auth"
 import { getAllRates, getRateByCurrency } from "@loukdo/backend/services/exchangeRate"
 
 export async function GET(request: Request) {

@@ -2,7 +2,6 @@ import NextAuth from "next-auth"
 import type { NextAuthConfig } from "next-auth"
 
 export const authConfig: NextAuthConfig = {
-  basePath: "/api/v1/auth",
   secret: process.env.AUTH_SECRET,
   trustHost: true,
   pages: {

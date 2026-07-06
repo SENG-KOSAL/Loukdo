@@ -30,7 +30,7 @@ export default function BranchLoginPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetch(`/api/branches?code=${branchCode}`)
+    fetch(`/api/v1/branches?code=${branchCode}`)
       .then((r) => {
         if (!r.ok) throw new Error("Branch not found")
         return r.json()

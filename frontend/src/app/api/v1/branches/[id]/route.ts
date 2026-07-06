@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/app/api/auth/[...nextauth]/auth"
+import { auth } from "@/app/api/v1/auth/[...nextauth]/auth"
 import { getAllBranches, getBranch, deleteBranch, duplicateBranch } from "@loukdo/backend/services/branch"
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {

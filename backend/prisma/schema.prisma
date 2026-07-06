@@ -22,26 +22,98 @@ model User {
 }
 
 model Branch {
-  id         String       @id @default(cuid())
-  name       String       @unique
-  code       String       @unique
+  id         String          @id @default(cuid())
+  name       String          @unique
+  code       String          @unique
   url        String?
   adminName  String?
   adminEmail String?
-  status     BranchStatus @default(ACTIVE)
+  status     BranchStatus    @default(ACTIVE)
   users      User[]
   sales      Sale[]
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  products   Product[]
+  categories Category[]
+  inventory  InventoryItem[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model Product {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal         @default(0)
+  cost        Decimal         @default(0)
+  sku         String?
+  barcode     String?
+  taxable     Boolean         @default(true)
+  active      Boolean         @default(true)
+  categoryId  String?
+  category    Category?       @relation(fields: [categoryId], references: [id])
+  branchId    String
+  branch      Branch          @relation(fields: [branchId], references: [id])
+  inventory   InventoryItem[]
+  saleItems   SaleItem[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@unique([sku, branchId])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String
+  desc      String?
+  active    Boolean   @default(true)
+  branchId  String
+  branch    Branch    @relation(fields: [branchId], references: [id])
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([slug, branchId])
 }
 
 model Sale {
+  id        String     @id @default(cuid())
+  receiptNo String?
+  subtotal  Decimal    @default(0)
+  tax       Decimal    @default(0)
+  total     Decimal    @default(0)
+  status    SaleStatus @default(COMPLETED)
+  branchId  String
+  branch    Branch     @relation(fields: [branchId], references: [id])
+  items     SaleItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model SaleItem {
+  id        String  @id @default(cuid())
+  quantity  Int     @default(1)
+  unitPrice Decimal @default(0)
+  total     Decimal @default(0)
+  saleId    String
+  sale      Sale    @relation(fields: [saleId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([saleId, productId])
+}
+
+model InventoryItem {
   id        String   @id @default(cuid())
+  quantity  Int      @default(0)
+  minStock  Int      @default(0)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
   branchId  String
   branch    Branch   @relation(fields: [branchId], references: [id])
-  total     Decimal  @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([productId, branchId])
 }
 
 enum Role {
@@ -54,4 +126,10 @@ enum BranchStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
+}
+
+enum SaleStatus {
+  COMPLETED
+  REFUNDED
+  VOID
 }

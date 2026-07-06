@@ -40,7 +40,7 @@ export default function BranchLayout({ children }: { children: React.ReactNode }
   const [branch, setBranch] = useState<{ name: string } | null>(null)
 
   useEffect(() => {
-    fetch(`/api/branches?code=${branchCode}`)
+    fetch(`/api/v1/branches?code=${branchCode}`)
       .then((r) => r.json())
       .then((d) => setBranch(d))
   }, [branchCode])

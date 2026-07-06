@@ -131,7 +131,7 @@ export default function BranchesPage() {
   const fetchBranches = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await apiClient<Branch[]>("/branches")
+      const data = await apiClient<Branch[]>("/v1/branches")
       setBranches(data)
     } catch {
       setError("Failed to load branches")
@@ -159,7 +159,7 @@ export default function BranchesPage() {
     if (!deleteTarget) return
     setDeleting(true)
     try {
-      await apiClient(`/branches/${deleteTarget.id}`, { method: "DELETE" })
+      await apiClient(`/v1/branches/${deleteTarget.id}`, { method: "DELETE" })
       setDeleteTarget(null)
       setDetail(null)
       await fetchBranches()
@@ -175,7 +175,7 @@ export default function BranchesPage() {
     setDuplicating(true)
     setError("")
     try {
-      const result = await apiClient<CreateResult>(`/branches/${duplicateTarget.id}`, {
+      const result = await apiClient<CreateResult>(`/v1/branches/${duplicateTarget.id}`, {
         method: "POST",
         body: JSON.stringify(dupForm),
       })
@@ -199,7 +199,7 @@ export default function BranchesPage() {
     setCreating(true)
     setError("")
     try {
-      const result = await apiClient<CreateResult>("/branches", {
+      const result = await apiClient<CreateResult>("/v1/branches", {
         method: "POST",
         body: JSON.stringify(form),
       })

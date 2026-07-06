@@ -1,4 +1,4 @@
-import { auth } from "@/app/api/auth/[...nextauth]/auth.config"
+import { auth } from "@/app/api/v1/auth/[...nextauth]/auth.config"
 
 export default auth((req) => {
   const { pathname } = req.nextUrl

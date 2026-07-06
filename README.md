@@ -8,7 +8,8 @@ Point of Sale system built with Next.js.
 | ------------ | ----------------------------- |
 | Frontend     | Next.js 15 (App Router)       |
 | Backend      | Next.js API routes + services |
-| UI           | Material UI (MUI) v6          |
+| UI           | shadcn/ui (Tailwind v4)       |
+| Layout       | Material UI (MUI) v6          |
 | Auth         | NextAuth.js v5                |
 | Database     | PostgreSQL 16                 |
 | ORM          | Prisma                        |
@@ -28,51 +29,81 @@ loukdo/
 │   ├── package.json
 │   ├── tsconfig.json
 │   ├── prisma/
-│   │   └── schema.prisma              # Database models (User, Branch, Role)
+│   │   └── schema.prisma              # Database models (User, Branch, Sale)
 │   └── src/
 │       ├── index.ts                   # Barrel exports
-│       ├── generated/prisma/          # Prisma client (gitignored)
+│       ├── generated/prisma/          # Generated Prisma client
 │       ├── services/
 │       │   ├── index.ts               # Re-exports
 │       │   ├── prisma.ts              # PrismaClient singleton
-│       │   └── branch.ts              # Branch CRUD
-│       ├── validators/                # Zod validation schemas
-│       └── types/                     # Shared TypeScript types
+│       │   ├── branch.ts              # Branch CRUD (getAll, create, delete, duplicate)
+│       │   ├── user.ts                # User queries (findByUsername, createBranchAdmin, getUsersByBranch)
+│       │   ├── sale.ts                # Sales queries (getSalesByBranch, createSale)
+│       │   └── password.ts            # Scrypt hash/verify helpers
+│       ├── validators/
+│       │   └── index.ts               # Zod schemas (login, register, createBranch)
+│       └── types/
+│           └── index.ts               # Shared TypeScript interfaces
 │
 └── frontend/
     ├── package.json
     ├── next.config.ts
     ├── tsconfig.json
+    ├── postcss.config.js               # Tailwind v4 + autoprefixer
+    ├── components.json                 # shadcn/ui configuration
     ├── public/
     └── src/
-        ├── middleware.ts              # NextAuth route protection
+        ├── middleware.ts               # NextAuth route protection
         ├── app/
-        │   ├── layout.tsx             # Root layout (MUI + Auth providers)
-        │   ├── page.tsx               # Redirect to login/dashboard
+        │   ├── globals.css             # Tailwind v4 + shadcn theme variables
+        │   ├── layout.tsx              # Root layout (MUI theme + Auth provider)
+        │   ├── page.tsx                # Redirect to /dashboard/admin or /login
         │   ├── (auth)/
-        │   │   ├── login/page.tsx     # Sign-in page (username + password)
-        │   │   └── register/page.tsx  # Registration page
-        │   ├── (dashboard)/
-        │   │   ├── page.tsx           # Protected dashboard
+        │   │   ├── login/page.tsx      # Sign-in page (username + password)
+        │   │   └── register/page.tsx   # Registration page
+        │   ├── branch/
+        │   │   └── [code]/
+        │   │       └── login/page.tsx  # Branch-specific login page
+        │   ├── dashboard/
         │   │   └── admin/
+        │   │       ├── page.tsx        # Admin dashboard overview (stats, recent branches)
         │   │       └── branches/
-        │   │           └── page.tsx   # Branch management (admin)
+        │   │           └── page.tsx    # Branch management (CRUD, card/list views)
         │   └── api/
-                │       ├── auth/[...nextauth]/
-        │       │   ├── auth.ts        # NextAuth config
-        │       │   └── route.ts       # Auth API handlers
-        │       └── branches/
-        │           └── route.ts       # Branches API (GET list, POST create)
+        │       ├── auth/[...nextauth]/
+        │       │   ├── auth.config.ts  # NextAuth config (middleware guard)
+        │       │   ├── auth.ts         # Credentials provider setup
+        │       │   └── route.ts        # Auth API handlers
+        │       ├── branches/
+        │       │   ├── route.ts        # Branches API (GET list, POST create)
+        │       │   └── [id]/route.ts   # Branch API (GET, DELETE, POST duplicate)
+        │       └── sales/
+        │           └── route.ts        # Sales API (GET by branch, POST create)
         ├── components/
-        │   ├── providers/
-        │   │   ├── ThemeRegistry.tsx  # MUI theme & cache
-        │   │   └── AuthProvider.tsx   # NextAuth session provider
-        │   └── layouts/
-        │       └── DashboardLayout.tsx # Sidebar + AppBar shell
+        │   ├── ui/                     # shadcn/ui primitives
+        │   │   ├── badge.tsx
+        │   │   ├── button.tsx
+        │   │   ├── card.tsx
+        │   │   ├── dialog.tsx
+        │   │   ├── input.tsx
+        │   │   ├── label.tsx
+        │   │   ├── select.tsx
+        │   │   ├── separator.tsx
+        │   │   ├── sheet.tsx
+        │   │   └── table.tsx
+        │   ├── layouts/
+        │   │   └── DashboardLayout.tsx   # Sidebar + AppBar shell (MUI)
+        │   └── providers/
+        │       ├── ThemeRegistry.tsx    # MUI theme provider + cache
+        │       └── AuthProvider.tsx     # NextAuth session provider
         ├── lib/
-        │   └── api-client.ts          # Fetch wrapper
-        └── stores/
-            └── index.ts               # Zustand stores
+        │   ├── api-client.ts           # Generic fetch wrapper
+        │   ├── password.ts             # Client-side password utilities
+        │   └── utils.ts                # cn() helper (clsx + tailwind-merge)
+        ├── stores/
+        │   └── index.ts                # Zustand stores (sidebar state)
+        └── types/
+            └── next-auth.d.ts          # NextAuth type augmentation
 ```
 
 ## Getting Started
@@ -89,7 +120,7 @@ loukdo/
 npm install
 ```
 
-### 2. Crep te the database
+### 2. Create the database
 
 Connect to PostgreSQL and create the database and user:
 
@@ -137,7 +168,35 @@ npm run -w backend db:migrate
 npm run -w frontend dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — you will be redirected to the login page. Sign in with username `admin` and password `admin` (hardcoded stub).
+Open [http://localhost:3000](http://localhost:3000) — you will be redirected to the login page.
+
+## Authentication
+
+The system has two completely separate login flows that never mix:
+
+### Admin Console
+
+| Field     | Value  |
+|-----------|--------|
+| URL       | `/login` |
+| Username  | `admin` |
+| Password  | `admin` |
+
+Admin credentials are **hardcoded** in `auth.ts`. Admin login sends `loginType: "admin"` and redirects to `/dashboard/admin` on success. The admin console is used to manage branch locations, view sales data, and oversee the network.
+
+### Branch Login
+
+Each branch has its own login page at `/branch/{code}/login`. Branch users are stored in the database (`User` table with a `branchId` foreign key). When logging in, the system:
+
+1. Extracts `branchCode` from the URL path
+2. Sends `loginType: "branch"` + `branchCode` in the credentials payload
+3. Looks up the user by username in the database
+4. Verifies the password against the stored scrypt hash
+5. Confirms `user.branchId` matches the branch identified by `branchCode`
+6. On success, redirects to `/branch/{code}` (branch landing page)
+7. On failure, shows "Invalid credentials or unauthorized branch access"
+
+Branch users **cannot** access the admin console at `/dashboard/*`, and admin users **cannot** access branch portals.
 
 ### 6. (Optional) Open Prisma Studio
 
@@ -168,5 +227,5 @@ npm run -w backend db:studio
 | `lint`    | Run Next.js lint          |
 
 
-after create new schema 
+after create new schema
 npm run -w backend db:push

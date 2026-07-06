@@ -1,7 +1,10 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { Building2, Users, Activity, Plus, ArrowRight, RefreshCw, Store, ShieldCheck, Timer } from "lucide-react"
+import { useState, useEffect, useCallback, useRef } from "react"
+import {
+  Building2, Users, Activity, Plus, ArrowRight, RefreshCw, Store, ShieldCheck, Timer,
+  DollarSign, TrendingUp, TrendingDown,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +12,18 @@ import DashboardLayout from "@/components/layouts/DashboardLayout"
 import { apiClient } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+
+interface ExchangeRate {
+  id: number
+  validDate: string
+  currencyId: string
+  currency: string
+  symbol: string
+  unit: number
+  bid: number
+  ask: number
+  average: number
+}
 
 interface Branch {
   id: string
@@ -44,15 +59,21 @@ function StatCard({ icon, label, value, sublabel }: {
   )
 }
 
+const KEY_CURRENCIES = ["USD", "EUR", "GBP", "JPY", "CNY", "THB", "AUD", "CAD"]
+
 export default function AdminDashboard() {
   const [branches, setBranches] = useState<Branch[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [rates, setRates] = useState<ExchangeRate[]>([])
+  const [ratesLoading, setRatesLoading] = useState(true)
+  const [ratesPrev, setRatesPrev] = useState<Record<string, number>>({})
+  const ratesRef = useRef<ExchangeRate[]>([])
 
   const fetchBranches = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await apiClient<Branch[]>("/branches")
+      const data = await apiClient<Branch[]>("/v1/branches")
       setBranches(data)
     } catch {
       setError("Failed to load dashboard data")
@@ -61,7 +82,24 @@ export default function AdminDashboard() {
     }
   }, [])
 
+  const fetchRates = useCallback(async () => {
+    setRatesLoading(true)
+    try {
+      const data = await apiClient<ExchangeRate[]>("/v1/exchange-rates")
+      const prev: Record<string, number> = {}
+      ratesRef.current.forEach((r) => { prev[r.currencyId] = r.average })
+      setRatesPrev(prev)
+      ratesRef.current = data
+      setRates(data)
+    } catch {
+      // silently fail - rates are non-critical
+    } finally {
+      setRatesLoading(false)
+    }
+  }, [])
+
   useEffect(() => { fetchBranches() }, [fetchBranches])
+  useEffect(() => { fetchRates() }, [fetchRates])
 
   const totalBranches = branches.length
   const activeBranches = branches.filter((b) => b.status === "ACTIVE").length
@@ -126,6 +164,64 @@ export default function AdminDashboard() {
           value={loading || totalBranches === 0 ? "\u2014" : `${Math.round((activeBranches / totalBranches) * 100)}%`}
           sublabel={activeBranches > 0 ? `${activeBranches}/${totalBranches} operational` : undefined}
         />
+      </div>
+
+      <div className="mt-8">
+        <Card className="p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <DollarSign className="size-4 text-muted-foreground" />
+              <h2 className="text-base font-semibold">Exchange Rates</h2>
+              {rates.length > 0 && (
+                <span className="text-[11px] text-muted-foreground">
+                  vs KHR &middot; {rates.find((r) => r.currencyId === "USD")?.validDate}
+                </span>
+              )}
+            </div>
+            <Button variant="ghost" size="icon" onClick={fetchRates} disabled={ratesLoading}>
+              <RefreshCw className={cn("size-3.5", ratesLoading && "animate-spin")} />
+            </Button>
+          </div>
+          {ratesLoading && rates.length === 0 ? (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="space-y-2 rounded-lg border p-3">
+                  <div className="h-3 w-8 animate-pulse rounded bg-muted" />
+                  <div className="h-5 w-16 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-12 animate-pulse rounded bg-muted" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+              {rates
+                .filter((r) => KEY_CURRENCIES.includes(r.currencyId))
+                .map((r) => {
+                  const prev = ratesPrev[r.currencyId]
+                  const diff = prev ? ((r.average - prev) / prev) * 100 : 0
+                  const isUp = diff > 0
+                  const TrendIcon = isUp ? TrendingUp : diff < 0 ? TrendingDown : null
+                  return (
+                    <div
+                      key={r.currencyId}
+                      className="rounded-lg border p-3 transition-colors hover:bg-muted/50"
+                    >
+                      <p className="text-[11px] font-medium text-muted-foreground">{r.currencyId}</p>
+                      <p className="mt-1 text-lg font-bold tabular-nums tracking-tight">
+                        {r.average.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                        {TrendIcon && (
+                          <TrendIcon className={cn("size-3", isUp ? "text-green-500" : "text-red-500")} />
+                        )}
+                        {r.unit > 1 ? `per ${r.unit} units` : ""}
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          )}
+        </Card>
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">

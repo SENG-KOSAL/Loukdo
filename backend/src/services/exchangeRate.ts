@@ -1,5 +1,45 @@
 const NBC_API_URL = "https://www.nbc.gov.kh/api/exRate.php"
 
+interface CacheEntry {
+  data: ExchangeRate[]
+  date: string
+  slot: "9AM" | "3PM"
+}
+
+let cache: CacheEntry | null = null
+
+function todayKey(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function yesterdayKey(): string {
+  const d = new Date()
+  d.setDate(d.getDate() - 1)
+  return d.toISOString().slice(0, 10)
+}
+
+function currentSlot(): { date: string; slot: "9AM" | "3PM" } | null {
+  const hour = new Date().getHours()
+  const today = todayKey()
+
+  if (hour >= 15) return { date: today, slot: "3PM" }
+  if (hour >= 9) return { date: today, slot: "9AM" }
+  return { date: yesterdayKey(), slot: "3PM" }
+}
+
+function isCacheValid(): boolean {
+  if (!cache) return false
+  const needed = currentSlot()
+  if (!needed) return false
+  return cache.date === needed.date && cache.slot === needed.slot
+}
+
+function setCache(data: ExchangeRate[]): void {
+  const needed = currentSlot()
+  if (!needed) return
+  cache = { data, date: needed.date, slot: needed.slot }
+}
+
 export interface ExchangeRate {
   id: number
   validDate: string
@@ -74,16 +114,23 @@ function parseNbcXml(xml: string): Omit<ExchangeRate, "id">[] {
 }
 
 export async function getAllRates(): Promise<ExchangeRate[]> {
+  if (isCacheValid()) {
+    return cache!.data
+  }
+
   const res = await fetch(NBC_API_URL)
 
   if (!res.ok) {
+    if (cache) return cache.data
     throw new Error(`NBC API returned ${res.status}: ${res.statusText}`)
   }
 
   const xml = await res.text()
   const items = parseNbcXml(xml)
+  const result = items.map((item, idx) => ({ id: idx + 1, ...item }))
 
-  return items.map((item, idx) => ({ id: idx + 1, ...item }))
+  setCache(result)
+  return result
 }
 
 export async function getRateByCurrency(currencyId: string): Promise<ExchangeRate | null> {

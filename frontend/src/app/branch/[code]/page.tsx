@@ -1,96 +1,141 @@
 "use client"
 
 import { useParams, useRouter } from "next/navigation"
-import { useSession, signOut } from "next-auth/react"
-import { Store, LogOut, User, ExternalLink } from "lucide-react"
+import { useSession } from "next-auth/react"
+import {
+  Store, ShoppingCart, Package, Tags, History,
+  Users, Boxes, Settings, TrendingUp, Receipt,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { useEffect, useState } from "react"
+import { Card } from "@/components/ui/card"
+import BranchLayout from "@/components/layouts/BranchLayout"
+import { cn } from "@/lib/utils"
+import Link from "next/link"
 
-export default function BranchLandingPage() {
+const modules = [
+  { label: "POS", icon: ShoppingCart, href: "/pos", desc: "Sell products & process orders", color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
+  { label: "Products", icon: Package, href: "/products", desc: "Manage product catalog", color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
+  { label: "Categories", icon: Tags, href: "/categories", desc: "Organize product groups", color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-950/30" },
+  { label: "Sales", icon: History, href: "/sales", desc: "View transaction history", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
+  { label: "Users", icon: Users, href: "/users", desc: "Manage cashiers & staff", color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30" },
+  { label: "Inventory", icon: Boxes, href: "/inventory", desc: "Track stock levels", color: "text-cyan-600", bg: "bg-cyan-50 dark:bg-cyan-950/30" },
+  { label: "Settings", icon: Settings, href: "/settings", desc: "Tax, receipt & store config", color: "text-slate-600", bg: "bg-slate-50 dark:bg-slate-950/30" },
+]
+
+export default function BranchDashboardPage() {
   const params = useParams()
   const router = useRouter()
   const branchCode = params.code as string
   const { data: session } = useSession()
-  const [branch, setBranch] = useState<{ name: string; code: string } | null>(null)
 
-  useEffect(() => {
-    fetch(`/api/branches?code=${branchCode}`)
-      .then((r) => r.json())
-      .then((d) => setBranch(d))
-  }, [branchCode])
-
-  const isBranchUser = session?.user?.branchId
-
-  if (!isBranchUser) {
+  if (!session?.user?.branchId) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Card className="max-w-sm text-center">
-          <CardContent className="py-8">
-            <p className="text-destructive">Unauthorized — branch login required</p>
-            <Button className="mt-4" onClick={() => router.push(`/branch/${branchCode}/login`)}>
-              Go to Login
-            </Button>
-          </CardContent>
+        <Card className="max-w-sm text-center p-8">
+          <Store className="mx-auto size-10 text-muted-foreground/40 mb-3" />
+          <p className="text-destructive font-medium">Unauthorized</p>
+          <p className="text-sm text-muted-foreground mt-1">Branch login required.</p>
+          <Button className="mt-4" onClick={() => router.push(`/branch/${branchCode}/login`)}>
+            Go to Login
+          </Button>
         </Card>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-sm">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
-              <Store className="size-4" />
-            </div>
-            <span className="font-semibold text-sm">
-              {branch?.name || branchCode}
-            </span>
-            <Badge variant="outline" className="text-[10px] font-mono">{branchCode}</Badge>
+    <BranchLayout>
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Branch Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Overview and quick access to all branch modules
+            </p>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:block">
-              {session?.user?.name || session?.user?.username}
-            </span>
-            <Button variant="ghost" size="icon-sm" onClick={() => signOut()}>
-              <LogOut className="size-4" />
+          <Link href={`/branch/${branchCode}/pos`}>
+            <Button className="gap-2 shadow-sm">
+              <ShoppingCart className="size-4" />
+              Open POS
             </Button>
+          </Link>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Today&apos;s Sales</p>
+              <p className="text-2xl font-bold">$0.00</p>
+              <p className="text-xs text-muted-foreground">No transactions yet</p>
+            </div>
+            <div className="rounded-lg bg-emerald-50 p-2.5 text-emerald-600 dark:bg-emerald-950/30">
+              <Receipt className="size-5" />
+            </div>
           </div>
-        </div>
-      </header>
-
-      <main className="flex-1 mx-auto w-full max-w-5xl p-4 sm:p-6">
-        <div className="mb-6">
-          <h1 className="text-xl font-bold">Welcome to {branch?.name || branchCode}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Point of Sale dashboard for this branch location
-          </p>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Card className="p-5">
-            <CardTitle className="text-sm font-medium text-muted-foreground mb-1">Location Code</CardTitle>
-            <p className="text-2xl font-bold font-mono">{branchCode}</p>
-          </Card>
-          <Card className="p-5">
-            <CardTitle className="text-sm font-medium text-muted-foreground mb-1">Signed in as</CardTitle>
-            <p className="text-2xl font-bold truncate">{session?.user?.name || session?.user?.username}</p>
-          </Card>
-          <Card className="p-5">
-            <CardTitle className="text-sm font-medium text-muted-foreground mb-1">Role</CardTitle>
-            <p className="text-2xl font-bold capitalize">{((session?.user as { role?: string })?.role || "staff").toLowerCase()}</p>
-          </Card>
-        </div>
-
-        <Card className="mt-6 p-6 text-center text-muted-foreground border-dashed">
-          <Store className="mx-auto size-8 mb-2 text-muted-foreground/40" />
-          <p className="text-sm font-medium">POS interface coming soon</p>
-          <p className="text-xs mt-1">This branch portal will be the main Point of Sale workspace.</p>
         </Card>
-      </main>
-    </div>
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Orders</p>
+              <p className="text-2xl font-bold">0</p>
+              <p className="text-xs text-muted-foreground">Today</p>
+            </div>
+            <div className="rounded-lg bg-blue-50 p-2.5 text-blue-600 dark:bg-blue-950/30">
+              <TrendingUp className="size-5" />
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Products</p>
+              <p className="text-2xl font-bold">&mdash;</p>
+              <p className="text-xs text-muted-foreground">In catalog</p>
+            </div>
+            <div className="rounded-lg bg-amber-50 p-2.5 text-amber-600 dark:bg-amber-950/30">
+              <Package className="size-5" />
+            </div>
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Staff</p>
+              <p className="text-2xl font-bold">&mdash;</p>
+              <p className="text-xs text-muted-foreground">Active users</p>
+            </div>
+            <div className="rounded-lg bg-violet-50 p-2.5 text-violet-600 dark:bg-violet-950/30">
+              <Users className="size-5" />
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <h2 className="text-base font-semibold mb-4">Modules</h2>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {modules.map((m) => {
+          const Icon = m.icon
+          return (
+            <Link key={m.label} href={`/branch/${branchCode}${m.href}`}>
+              <Card className="group p-4 transition-all hover:shadow-md hover:border-primary/25 cursor-pointer h-full">
+                <div className="flex items-start gap-3">
+                  <div className={cn("rounded-lg p-2.5 shrink-0", m.bg)}>
+                    <Icon className={cn("size-5", m.color)} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm group-hover:text-primary transition-colors">{m.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{m.desc}</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          )
+        })}
+      </div>
+    </BranchLayout>
   )
 }
+
+

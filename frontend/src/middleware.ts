@@ -4,11 +4,12 @@ export default auth((req) => {
   const { pathname } = req.nextUrl
   const isLoggedIn = !!req.auth?.user
 
-  const branchMatch = pathname.match(/^\/branch\/([^/]+)$/)
-  const branchLoginMatch = pathname.match(/^\/branch\/([^/]+)\/login$/)
+  const branchPathMatch = pathname.match(/^\/branch\/([^/]+)/)
+  const isBranchRoute = !!branchPathMatch
+  const isBranchLogin = pathname.match(/\/login$/)
 
-  if (branchMatch && isLoggedIn) return
-  if (branchLoginMatch) return
+  if (isBranchRoute && isBranchLogin) return
+  if (isBranchRoute && isLoggedIn) return
 
   const isOnDashboard = pathname.startsWith("/dashboard")
   if (isOnDashboard && !isLoggedIn) {

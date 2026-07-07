@@ -54,6 +54,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               username: user.username,
               role: user.role as string,
               branchId: user.branchId ?? undefined,
+              branchCode: branch.code,
             }
           } catch {
             return null
@@ -70,11 +71,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.username = user.username
         token.role = user.role
         token.branchId = user.branchId
+        token.branchCode = user.branchCode
       }
       return token
     },
     session({ session, token }) {
-      const t = token as { username?: string; role?: string; branchId?: string }
+      const t = token as { username?: string; role?: string; branchId?: string; branchCode?: string }
       return { ...session, user: { ...session.user, ...t } }
     },
   },

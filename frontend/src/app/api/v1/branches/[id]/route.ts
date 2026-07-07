@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/app/api/auth/[...nextauth]/auth"
 import { getAllBranches, getBranch, deleteBranch, duplicateBranch } from "@loukdo/backend/services/branch"
+import type { Session } from "next-auth"
+
+function isAdmin(session: Session | null): boolean {
+  const user = session?.user as { role?: string } | undefined
+  return !!user && user.role === "ADMIN"
+}
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!isAdmin(session)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
   const branch = await getBranch(id)
@@ -14,7 +20,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!isAdmin(session)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
   await deleteBranch(id)
@@ -23,7 +29,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!isAdmin(session)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id } = await params
   const body = await request.json()

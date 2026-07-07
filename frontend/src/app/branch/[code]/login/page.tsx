@@ -55,7 +55,7 @@ export default function BranchLoginPage() {
       setError("Invalid credentials or unauthorized branch access")
       setLoading(false)
     } else {
-      router.push(`/branch/${branchCode}/pos`)
+      window.location.href = `/branch/${branchCode}/pos`
     }
   }
 

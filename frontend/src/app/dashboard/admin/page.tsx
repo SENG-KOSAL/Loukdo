@@ -12,6 +12,8 @@ import DashboardLayout from "@/components/layouts/DashboardLayout"
 import { apiClient } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 interface ExchangeRate {
   id: number
@@ -62,6 +64,16 @@ function StatCard({ icon, label, value, sublabel }: {
 const KEY_CURRENCIES = ["USD", "EUR", "GBP", "JPY", "CNY", "THB", "AUD", "CAD"]
 
 export default function AdminDashboard() {
+  const router = useRouter()
+  const { data: session } = useSession()
+  const userRole = (session?.user as { role?: string } | undefined)?.role
+
+  useEffect(() => {
+    if (session !== undefined && userRole !== "ADMIN") {
+      router.replace("/login")
+    }
+  }, [session, userRole, router])
+
   const [branches, setBranches] = useState<Branch[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")

@@ -5,15 +5,21 @@ import { getAllBranches, createBranch, getBranch } from "@loukdo/backend/service
 import { createBranchSchema } from "@loukdo/backend/validators"
 
 export async function GET(request: Request) {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
   const { searchParams } = new URL(request.url)
   const code = searchParams.get("code")
+
+  // Public: branch lookup by code (used by branch login page before auth)
   if (code) {
     const branch = await prisma.branch.findUnique({ where: { code } })
     if (!branch) return NextResponse.json({ error: "Branch not found" }, { status: 404 })
     return NextResponse.json(branch)
+  }
+
+  // Protected: listing all branches requires ADMIN role
+  const session = await auth()
+  const user = session?.user as { role?: string } | undefined
+  if (!user || user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   const branches = await getAllBranches()
@@ -22,7 +28,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const user = session?.user as { role?: string } | undefined
+  if (!user || user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   const body = await request.json()
   const parsed = createBranchSchema.safeParse(body)

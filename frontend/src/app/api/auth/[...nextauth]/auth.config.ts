@@ -14,6 +14,13 @@ export const authConfig: NextAuthConfig = {
       if (isOnDashboard && !isLoggedIn) return false
       return true
     },
+    jwt({ token }) {
+      return token
+    },
+    session({ session, token }) {
+      const t = token as { username?: string; role?: string; branchId?: string; branchCode?: string }
+      return { ...session, user: { ...session.user, ...t } }
+    },
   },
   providers: [],
 }

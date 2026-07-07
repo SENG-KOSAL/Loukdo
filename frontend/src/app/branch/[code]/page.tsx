@@ -27,8 +27,9 @@ export default function BranchDashboardPage() {
   const router = useRouter()
   const branchCode = params.code as string
   const { data: session } = useSession()
+  const sessionBranchCode = (session?.user as { branchCode?: string } | undefined)?.branchCode
 
-  if (!session?.user?.branchId) {
+  if (!session?.user?.branchId || (sessionBranchCode && sessionBranchCode !== branchCode)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Card className="max-w-sm text-center p-8">

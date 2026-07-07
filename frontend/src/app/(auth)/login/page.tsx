@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { User, Lock, LogIn, Eye, EyeOff, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -17,7 +16,6 @@ import {
 import Link from "next/link"
 
 export default function LoginPage() {
-  const router = useRouter()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -33,7 +31,7 @@ export default function LoginPage() {
       setError("Invalid username or password")
       setLoading(false)
     } else {
-      router.push("/dashboard/admin")
+      window.location.href = "/dashboard/admin"
     }
   }
 

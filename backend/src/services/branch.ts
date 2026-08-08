@@ -3,7 +3,7 @@ import { createBranchAdmin } from "./user"
 
 export async function getAllBranches() {
   return prisma.branch.findMany({
-    include: { users: { where: { role: "ADMIN" }, select: { username: true, email: true } } },
+    include: { users: { where: { role: "BRANCH_ADMIN" }, select: { username: true, email: true } } },
     orderBy: { createdAt: "desc" },
   })
 }

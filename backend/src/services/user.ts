@@ -15,7 +15,7 @@ export async function createBranchAdmin(data: {
       username: data.username,
       email: `${data.username}@${data.branchId.slice(0, 8)}.local`,
       password: hash(data.password),
-      role: "ADMIN",
+      role: "BRANCH_ADMIN",
       branchId: data.branchId,
     },
   })

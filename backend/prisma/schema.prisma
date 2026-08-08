@@ -14,7 +14,7 @@ model User {
   username  String   @unique
   email     String   @unique
   password  String
-  role      Role     @default(STAFF)
+  role      Role     @default(CASHIER)
   branchId  String?
   branch    Branch?  @relation(fields: [branchId], references: [id])
   createdAt DateTime @default(now())
@@ -117,9 +117,10 @@ model InventoryItem {
 }
 
 enum Role {
-  ADMIN
+  SUPER_ADMIN
+  BRANCH_ADMIN
   MANAGER
-  STAFF
+  CASHIER
 }
 
 enum BranchStatus {

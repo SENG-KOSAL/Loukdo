@@ -69,7 +69,7 @@ export default function AdminDashboard() {
   const userRole = (session?.user as { role?: string } | undefined)?.role
 
   useEffect(() => {
-    if (session !== undefined && userRole !== "ADMIN") {
+    if (session !== undefined && userRole !== "SUPER_ADMIN") {
       router.replace("/login")
     }
   }, [session, userRole, router])

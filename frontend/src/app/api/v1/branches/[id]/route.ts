@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/app/api/auth/[...nextauth]/auth"
 import { getAllBranches, getBranch, deleteBranch, duplicateBranch } from "@loukdo/backend/services/branch"
-import type { Session } from "next-auth"
+import { hasRole, ROLES, type AccessUser } from "@loukdo/backend/services/access"
 
-function isAdmin(session: Session | null): boolean {
-  const user = session?.user as { role?: string } | undefined
-  return !!user && user.role === "ADMIN"
+function isSuperAdmin(user: AccessUser | undefined): boolean {
+  return hasRole(user ?? null, ROLES.SUPER_ADMIN)
 }
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
-  if (!isAdmin(session)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!isSuperAdmin(session?.user as AccessUser | undefined)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
   const { id } = await params
   const branch = await getBranch(id)
@@ -20,7 +19,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
-  if (!isAdmin(session)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!isSuperAdmin(session?.user as AccessUser | undefined)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
   const { id } = await params
   await deleteBranch(id)
@@ -29,7 +28,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
-  if (!isAdmin(session)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  if (!isSuperAdmin(session?.user as AccessUser | undefined)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
   const { id } = await params
   const body = await request.json()

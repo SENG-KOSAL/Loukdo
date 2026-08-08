@@ -22,8 +22,8 @@ export default auth((req) => {
   // ---------------------------------------------------------------------------
   // 2. Protected: Admin dashboard
   //    Routes: /dashboard/admin, /dashboard/admin/*
-  //    Only authenticated users with role "ADMIN" may access.
-  //    Non-admin users (branch MANAGER/STAFF) are redirected to /login.
+  //    Only authenticated users with role "SUPER_ADMIN" may access.
+  //    Non-super-admin users are redirected to /login.
   // ---------------------------------------------------------------------------
   const isOnDashboard = pathname.startsWith("/dashboard")
 
@@ -32,7 +32,7 @@ export default auth((req) => {
       const loginUrl = new URL("/login", req.url)
       return Response.redirect(loginUrl)
     }
-    if (user?.role !== "ADMIN") {
+    if (user?.role !== "SUPER_ADMIN") {
       const loginUrl = new URL("/login", req.url)
       return Response.redirect(loginUrl)
     }

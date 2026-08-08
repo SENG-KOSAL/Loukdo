@@ -33,7 +33,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: "Administrator",
             email: "admin@loukdo.com",
             username: "admin",
-            role: "ADMIN",
+            role: "SUPER_ADMIN",
           }
         }
 

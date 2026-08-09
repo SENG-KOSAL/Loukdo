@@ -9,6 +9,49 @@ function isSuperAdmin(user: AccessUser | undefined): boolean {
   return hasRole(user ?? null, ROLES.SUPER_ADMIN)
 }
 
+/**
+ * @swagger
+ * /api/v1/branches:
+ *   get:
+ *     tags: [Branches]
+ *     summary: List branches or look up a branch by code
+ *     description: >-
+ *       Returns all branches (SUPER_ADMIN only). Pass `?code=` to look up a
+ *       single branch publicly without authentication.
+ *     security:
+ *       - cookieAuth: []
+ *       - {}
+ *     parameters:
+ *       - name: code
+ *         in: query
+ *         required: false
+ *         description: Branch code for a public single-branch lookup
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of branches, or a single branch when `code` is provided
+ *         content:
+ *           application/json:
+ *             schema:
+ *               oneOf:
+ *                 - type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Branch'
+ *                 - $ref: '#/components/schemas/Branch'
+ *       403:
+ *         description: Forbidden - requires SUPER_ADMIN role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Branch not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const code = searchParams.get("code")
@@ -28,6 +71,47 @@ export async function GET(request: Request) {
   return NextResponse.json(branches)
 }
 
+/**
+ * @swagger
+ * /api/v1/branches:
+ *   post:
+ *     tags: [Branches]
+ *     summary: Create a branch
+ *     description: Creates a branch and optionally a BRANCH_ADMIN user (SUPER_ADMIN only).
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateBranchInput'
+ *     responses:
+ *       201:
+ *         description: Branch created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Branch'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Forbidden - requires SUPER_ADMIN role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       409:
+ *         description: Branch name or code already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 export async function POST(request: Request) {
   const session = await auth()
   if (!isSuperAdmin(session?.user as AccessUser | undefined)) {

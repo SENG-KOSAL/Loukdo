@@ -29,7 +29,7 @@ loukdo/
 │   ├── package.json
 │   ├── tsconfig.json
 │   ├── prisma/
-│   │   └── schema.prisma              # Database models (User, Branch, Sale)
+│   │   └── schema.prisma              # Database models (User, Branch, Sale, Product, etc.)
 │   └── src/
 │       ├── index.ts                   # Barrel exports
 │       ├── generated/prisma/          # Generated Prisma client
@@ -39,6 +39,7 @@ loukdo/
 │       │   ├── branch.ts              # Branch CRUD (getAll, create, delete, duplicate)
 │       │   ├── user.ts                # User queries (findByUsername, createBranchAdmin, getUsersByBranch)
 │       │   ├── sale.ts                # Sales queries (getSalesByBranch, createSale)
+│       │   ├── exchangeRate.ts        # NBC Cambodia FX rate fetcher + cache
 │       │   └── password.ts            # Scrypt hash/verify helpers
 │       ├── validators/
 │       │   └── index.ts               # Zod schemas (login, register, createBranch)
@@ -53,32 +54,43 @@ loukdo/
     ├── components.json                 # shadcn/ui configuration
     ├── public/
     └── src/
-        ├── middleware.ts               # NextAuth route protection
+        ├── middleware.ts               # Route protection (ADMIN role + branch ownership)
         ├── app/
         │   ├── globals.css             # Tailwind v4 + shadcn theme variables
         │   ├── layout.tsx              # Root layout (MUI theme + Auth provider)
         │   ├── page.tsx                # Redirect to /dashboard/admin or /login
         │   ├── (auth)/
-        │   │   ├── login/page.tsx      # Sign-in page (username + password)
-        │   │   └── register/page.tsx   # Registration page
+        │   │   ├── login/page.tsx      # Admin sign-in (hardcoded admin/admin)
+        │   │   └── register/page.tsx   # Registration placeholder
         │   ├── branch/
         │   │   └── [code]/
-        │   │       └── login/page.tsx  # Branch-specific login page
+        │   │       ├── page.tsx        # Branch dashboard (module cards + stats)
+        │   │       ├── login/page.tsx  # Per-branch login page
+        │   │       ├── pos/page.tsx    # POS terminal (placeholder)
+        │   │       ├── products/page.tsx
+        │   │       ├── categories/page.tsx
+        │   │       ├── sales/page.tsx
+        │   │       ├── users/page.tsx
+        │   │       ├── inventory/page.tsx
+        │   │       └── settings/page.tsx
         │   ├── dashboard/
         │   │   └── admin/
-        │   │       ├── page.tsx        # Admin dashboard overview (stats, recent branches)
+        │   │       ├── page.tsx        # Admin dashboard (stats, FX rates, recent branches)
         │   │       └── branches/
-        │   │           └── page.tsx    # Branch management (CRUD, card/list views)
+        │   │           └── page.tsx    # Branch management (CRUD, grid/list views)
         │   └── api/
         │       ├── auth/[...nextauth]/
-        │       │   ├── auth.config.ts  # NextAuth config (middleware guard)
-        │       │   ├── auth.ts         # Credentials provider setup
+        │       │   ├── auth.config.ts  # NextAuth config (middleware guard + session mapping)
+        │       │   ├── auth.ts         # Credentials provider (admin + branch login)
         │       │   └── route.ts        # Auth API handlers
-        │       ├── branches/
-        │       │   ├── route.ts        # Branches API (GET list, POST create)
-        │       │   └── [id]/route.ts   # Branch API (GET, DELETE, POST duplicate)
-        │       └── sales/
-        │           └── route.ts        # Sales API (GET by branch, POST create)
+        │       └── v1/
+        │           ├── branches/
+        │           │   ├── route.ts    # List (ADMIN), create (ADMIN), lookup by code (public)
+        │           │   └── [id]/route.ts  # Get, delete, duplicate (ADMIN only)
+        │           ├── sales/
+        │           │   └── route.ts    # List/create sales by session branchId
+        │           └── exchange-rates/
+        │               └── route.ts    # NBC Cambodia FX rates (authenticated)
         ├── components/
         │   ├── ui/                     # shadcn/ui primitives
         │   │   ├── badge.tsx
@@ -92,18 +104,19 @@ loukdo/
         │   │   ├── sheet.tsx
         │   │   └── table.tsx
         │   ├── layouts/
-        │   │   └── DashboardLayout.tsx   # Sidebar + AppBar shell (MUI)
+        │   │   ├── DashboardLayout.tsx  # Admin sidebar + AppBar (MUI)
+        │   │   └── BranchLayout.tsx     # Branch sidebar + top bar (Tailwind)
         │   └── providers/
         │       ├── ThemeRegistry.tsx    # MUI theme provider + cache
-        │       └── AuthProvider.tsx     # NextAuth session provider
+        │       └── AuthProvider.tsx     # NextAuth SessionProvider wrapper
         ├── lib/
         │   ├── api-client.ts           # Generic fetch wrapper
-        │   ├── password.ts             # Client-side password utilities
+        │   ├── password.ts             # Client-side scrypt helpers
         │   └── utils.ts                # cn() helper (clsx + tailwind-merge)
         ├── stores/
-        │   └── index.ts                # Zustand stores (sidebar state)
+        │   └── index.ts                # Zustand store (sidebar toggle state)
         └── types/
-            └── next-auth.d.ts          # NextAuth type augmentation
+            └── next-auth.d.ts          # NextAuth type augmentation (username, role, branchId, branchCode)
 ```
 
 ## Getting Started
@@ -168,7 +181,7 @@ npm run -w backend db:migrate
 npm run -w frontend dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — you will be redirected to the login page.
+Open [http://192.168.1.8:3000](http://192.168.1.8:3000) — you will be redirected to the login page.
 
 ## Authentication
 
@@ -203,6 +216,17 @@ Branch users **cannot** access the admin console at `/dashboard/*`, and admin us
 ```bash
 npm run -w backend db:studio
 ```
+
+## API Documentation
+
+Interactive Swagger UI docs are generated from `@swagger` JSDoc annotations in the API route handlers.
+
+- **Docs UI:** http://192.168.1.8:3000/api-docs
+- **OpenAPI spec (JSON):** http://192.168.1.8:3000/api/docs
+
+To test endpoints with **"Try it out"**, log in first at `/login` (or a branch login page) in the same browser. The API authenticates via NextAuth session cookies, and Swagger UI is served from the same origin, so your browser session cookie is sent automatically. Swagger UI's "Authorize" button is not used for cookie auth.
+
+> Note: NextAuth endpoints (`/api/auth/*`) are framework-managed and are intentionally not documented.
 
 ## Available Commands
 

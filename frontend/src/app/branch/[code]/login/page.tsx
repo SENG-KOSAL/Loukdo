@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { signIn } from "next-auth/react"
-import { Store, Lock, User, AlertCircle, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react"
+import { Store, AlertCircle, ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Card,
   CardContent,
@@ -15,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import Link from "next/link"
+import { LoginForm } from "@/components/auth/LoginForm"
 
 export default function BranchLoginPage() {
   const router = useRouter()
@@ -23,10 +22,7 @@ export default function BranchLoginPage() {
 
   const [branch, setBranch] = useState<{ name: string; code: string } | null>(null)
   const [branchLoading, setBranchLoading] = useState(true)
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -40,10 +36,9 @@ export default function BranchLoginPage() {
       .finally(() => setBranchLoading(false))
   }, [branchCode])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLogin = async ({ username, password }: { username: string; password: string }) => {
     setLoading(true)
-    setError("")
+    setError(null)
     const result = await signIn("credentials", {
       username,
       password,
@@ -104,39 +99,12 @@ export default function BranchLoginPage() {
               <Loader2 className="size-6 animate-spin text-muted-foreground" />
             </div>
           ) : branch ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <div className="relative">
-                  <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input id="username" type="text" placeholder="Enter your branch username"
-                    className="pl-9" value={username}
-                    onChange={(e) => setUsername(e.target.value)} required />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input id="password" type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password" className="pl-9 pr-9"
-                    value={password} onChange={(e) => setPassword(e.target.value)} required />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-              </div>
-              {error && (
-                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  <AlertCircle className="size-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
+            <LoginForm
+              onSubmit={handleLogin}
+              isLoading={loading}
+              errorMessage={error}
+              placeholderUsername="Enter your branch username"
+            />
           ) : error ? (
             <div className="flex flex-col items-center gap-3 py-4 text-center">
               <div className="rounded-full bg-destructive/10 p-3">

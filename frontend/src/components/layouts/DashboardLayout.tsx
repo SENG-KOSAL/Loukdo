@@ -1,103 +1,61 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import {
-  AppBar, Box, Drawer, IconButton, List, ListItem, ListItemButton,
-  ListItemIcon, ListItemText, Toolbar, Typography, Avatar, Tooltip,
-  Divider, useMediaQuery, useTheme, Menu, MenuItem, Badge, InputBase,
-  alpha,
-} from "@mui/material"
-import MenuIcon from "@mui/icons-material/Menu"
-import MenuOpenIcon from "@mui/icons-material/MenuOpen"
-import SearchIcon from "@mui/icons-material/Search"
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone"
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
-import ChevronRightIcon from "@mui/icons-material/ChevronRight"
-import LogoutIcon from "@mui/icons-material/Logout"
-import SettingsIcon from "@mui/icons-material/Settings"
-import CloseIcon from "@mui/icons-material/Close"
-import PointOfSaleIcon from "@mui/icons-material/PointOfSale"
-import DashboardIcon from "@mui/icons-material/Dashboard"
-import InventoryIcon from "@mui/icons-material/Inventory"
-import PeopleIcon from "@mui/icons-material/People"
-import ReceiptIcon from "@mui/icons-material/Receipt"
-import BusinessIcon from "@mui/icons-material/Business"
-import StorefrontIcon from "@mui/icons-material/Storefront"
-import { useAppStore } from "@/stores"
+import { useParams, usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
-import { usePathname } from "next/navigation"
 import Link from "next/link"
-
-const DRAWER_WIDTH = 264
-const DRAWER_COLLAPSED = 72
+import {
+  LayoutDashboard, Storefront, Building2, Package,
+  Receipt, Users, Menu, LogOut, Settings,
+  Search, X, Bell, ChevronLeft, ChevronRight,
+  ChevronDown,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useAppStore } from "@/stores"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const navSections = [
   {
     label: "Main",
     items: [
-      { label: "Dashboard", icon: <DashboardIcon />, href: "/dashboard/admin" },
-      { label: "POS", icon: <PointOfSaleIcon />, href: "/dashboard/pos" },
+      { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/admin" },
+      { label: "POS", icon: Storefront, href: "/dashboard/pos" },
     ],
   },
   {
     label: "Management",
     items: [
-      { label: "Branches", icon: <BusinessIcon />, href: "/dashboard/admin/branches" },
-      { label: "Products", icon: <InventoryIcon />, href: "/dashboard/products" },
-      { label: "Orders", icon: <ReceiptIcon />, href: "/dashboard/orders" },
-      { label: "Customers", icon: <PeopleIcon />, href: "/dashboard/customers" },
+      { label: "Branches", icon: Building2, href: "/dashboard/admin/branches" },
+      { label: "Products", icon: Package, href: "/dashboard/products" },
+      { label: "Orders", icon: Receipt, href: "/dashboard/orders" },
+      { label: "Customers", icon: Users, href: "/dashboard/customers" },
     ],
   },
 ]
 
-function stringToColor(string: string) {
-  let hash = 0
-  for (let i = 0; i < string.length; i++) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  let color = "#"
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 0xff
-    color += `00${value.toString(16)}`.slice(-2)
-  }
-  return color
-}
-
-function UserAvatar({ name, email, size = 32 }: {
-  name?: string | null
-  email?: string | null
-  size?: number
-}) {
-  const displayName = name || email || "U"
-  const initial = displayName.charAt(0).toUpperCase()
-  return (
-    <Avatar
-      sx={{
-        width: size, height: size,
-        bgcolor: stringToColor(displayName),
-        fontSize: Math.round(size * 0.44),
-        fontWeight: 600,
-        transition: "transform .15s ease",
-        "&:hover": { transform: "scale(1.05)" },
-      }}
-    >
-      {initial}
-    </Avatar>
-  )
+function getInitials(name: string) {
+  return name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { sidebarOpen, toggleSidebar, mobileOpen, setMobileOpen } = useAppStore()
   const { data: session } = useSession()
   const pathname = usePathname()
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
-
   const [searchQuery, setSearchQuery] = useState("")
-  const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null)
 
-  const showLabels = sidebarOpen || isMobile
+  const collapsed = !sidebarOpen
+  const showLabels = sidebarOpen
 
   const filteredSections = useMemo(() => {
     const q = searchQuery.trim().toLowerCase()
@@ -124,507 +82,221 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const searchActive = searchQuery.trim().length > 0
 
-  const drawerContent = (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Toolbar
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          px: 2,
-          minHeight: { xs: 56, md: 64 },
-        }}
-      >
-        <Box
-          sx={{
-            width: 34, height: 34, borderRadius: 1.75, flexShrink: 0,
-            background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 55%, #d946ef 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 4px 10px -2px rgba(139,92,246,.4)",
-          }}
-        >
-          <StorefrontIcon sx={{ color: "#fff", fontSize: 18 }} />
-        </Box>
-        {showLabels && (
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography
-              variant="subtitle2"
-              sx={{ fontWeight: 700, lineHeight: 1.2, whiteSpace: "nowrap", letterSpacing: "-0.01em" }}
-            >
-              Loukdo
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: "text.disabled", fontSize: "0.62rem", lineHeight: 1, letterSpacing: 1.4, textTransform: "uppercase" }}
-            >
-              POS Admin
-            </Typography>
-          </Box>
+  const sidebarContent = (
+    <div className="flex h-full flex-col bg-card border-r">
+      <div className={cn("flex h-14 items-center border-b px-3", collapsed ? "justify-center" : "justify-between")}>
+        {!collapsed && (
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold">
+              L
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold leading-tight">Loukdo</p>
+              <p className="truncate text-[10px] text-muted-foreground leading-tight uppercase tracking-wider">POS Admin</p>
+            </div>
+          </div>
         )}
-      </Toolbar>
+        {collapsed && (
+          <div className="flex size-7 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold">
+            L
+          </div>
+        )}
+      </div>
 
-      <Divider />
+      <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
+        {filteredSections.map((section) => (
+          <div key={section.label} className="mb-4">
+            {showLabels && (
+              <p className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                {section.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {section.items.map((item) => {
+                const Icon = item.icon
+                const active = isActive(item.href)
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      collapsed && "justify-center px-2",
+                    )}
+                  >
+                    {Icon && <Icon className="size-4 shrink-0" />}
+                    {!collapsed && <span className="truncate">{item.label}</span>}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
 
-      {searchActive && (
-        <Box sx={{ px: 1.5, pt: 1 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              px: 1.25,
-              py: 0.75,
-              borderRadius: 1.25,
-              bgcolor: alpha(theme.palette.primary.main, 0.06),
-              color: "text.secondary",
-            }}
-          >
-            <SearchIcon sx={{ fontSize: 15, color: "text.disabled" }} />
-            <Typography variant="caption" sx={{ flex: 1, fontWeight: 600 }}>
-              Results for &ldquo;{searchQuery}&rdquo;
-            </Typography>
-            <IconButton size="small" onClick={() => setSearchQuery("")} sx={{ p: 0.25 }}>
-              <CloseIcon sx={{ fontSize: 14 }} />
-            </IconButton>
-          </Box>
-        </Box>
-      )}
-
-      <Box sx={{ flex: 1, overflow: "auto", py: 1, px: showLabels ? 1 : 0 }}>
-        {filteredSections.length === 0 ? (
-          <Box sx={{ px: 3, py: 6, textAlign: "center" }}>
-            <SearchIcon sx={{ fontSize: 28, color: "text.disabled", opacity: 0.5 }} />
-            <Typography variant="body2" sx={{ mt: 1, color: "text.disabled" }}>
-              No pages match &ldquo;{searchQuery}&rdquo;
-            </Typography>
-          </Box>
+      <div className={cn("border-t p-2", collapsed && "flex flex-col items-center")}>
+        <div className={cn("flex items-center gap-2 rounded-lg px-2 py-1.5", !collapsed && "")}>
+          {!collapsed && (
+            <>
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground">
+                {getInitials(session?.user?.name || session?.user?.username || "U")}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-medium leading-tight">{session?.user?.name || session?.user?.username}</p>
+                <p className="truncate text-[10px] text-muted-foreground leading-tight capitalize">{(session?.user as { role?: string })?.role?.toLowerCase() || "admin"}</p>
+              </div>
+            </>
+          )}
+          <Button variant="ghost" size="icon" className="shrink-0 size-7 text-muted-foreground" onClick={() => signOut()}>
+            <LogOut className="size-3.5" />
+          </Button>
+        </div>
+        {collapsed ? (
+          <Button variant="ghost" size="icon" className="mt-1 size-7" onClick={() => setCollapsed(false)}>
+            <ChevronRight className="size-3.5" />
+          </Button>
         ) : (
-          filteredSections.map((section) => (
-            <Box key={section.label} sx={{ mb: 1 }}>
-              {showLabels && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    display: "block",
-                    px: 2, pt: 1.5, pb: 0.5,
-                    color: "text.disabled",
-                    fontWeight: 700,
-                    fontSize: "0.6rem",
-                    textTransform: "uppercase",
-                    letterSpacing: 1.2,
-                  }}
-                >
-                  {section.label}
-                </Typography>
-              )}
-              <List disablePadding>
-                {section.items.map((item) => {
-                  const active = isActive(item.href)
-                  const navButton = (
-                    <ListItemButton
-                      component={Link}
-                      href={item.href}
-                      selected={active}
-                      sx={{
-                        position: "relative",
-                        borderRadius: 1.5,
-                        minHeight: 42,
-                        my: 0.25,
-                        mx: showLabels ? 0 : 1,
-                        justifyContent: showLabels ? "initial" : "center",
-                        px: showLabels ? 1.5 : 1,
-                        transition: theme.transitions.create(
-                          ["background-color", "color", "box-shadow"],
-                          { duration: theme.transitions.duration.shorter },
-                        ),
-                        "&.Mui-selected": {
-                          bgcolor: alpha(theme.palette.primary.main, 0.1),
-                          color: "primary.main",
-                          boxShadow: `inset 0 0 0 1px ${alpha(theme.palette.primary.main, 0.18)}`,
-                          "&:hover": {
-                            bgcolor: alpha(theme.palette.primary.main, 0.16),
-                          },
-                          "& .MuiListItemIcon-root": { color: "primary.main" },
-                        },
-                      }}
-                    >
-                      {active && showLabels && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            left: -4, top: "50%",
-                            transform: "translateY(-50%)",
-                            width: 3.5, height: 18,
-                            borderRadius: 99,
-                            bgcolor: "primary.main",
-                          }}
-                        />
-                      )}
-                      <ListItemIcon
-                        sx={{
-                          position: "relative",
-                          minWidth: 0,
-                          mr: showLabels ? 1.75 : 0,
-                          justifyContent: "center",
-                          color: active ? "primary.main" : "action.active",
-                          transition: "color .15s ease",
-                        }}
-                      >
-                        {item.icon}
-                      </ListItemIcon>
-                      <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <ListItemText
-                          primary={item.label}
-                          sx={{
-                            opacity: showLabels ? 1 : 0,
-                            transition: theme.transitions.create("opacity", {
-                              duration: theme.transitions.duration.shorter,
-                            }),
-                            whiteSpace: "nowrap",
-                          }}
-                          primaryTypographyProps={{
-                            fontSize: "0.85rem",
-                            fontWeight: active ? 600 : 500,
-                          }}
-                        />
-                      </Box>
-                    </ListItemButton>
-                  )
-                  return (
-                    <ListItem key={item.label} disablePadding sx={{ position: "relative" }}>
-                      {showLabels ? navButton : (
-                        <Tooltip title={item.label} placement="right" arrow>
-                          {navButton}
-                        </Tooltip>
-                      )}
-                    </ListItem>
-                  )
-                })}
-              </List>
-            </Box>
-          ))
+          <Button variant="ghost" size="icon" className="mt-1 w-full justify-center text-muted-foreground" onClick={() => setCollapsed(true)}>
+            <ChevronLeft className="size-3.5" />
+          </Button>
         )}
-      </Box>
-
-      <Divider />
-
-      <Box
-        sx={{
-          p: 1.5,
-          cursor: "pointer",
-          borderTop: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            p: showLabels ? 1 : 0.5,
-            borderRadius: 1.5,
-            justifyContent: showLabels ? "initial" : "center",
-            transition: "background-color .2s ease",
-            "&:hover": { bgcolor: theme.palette.action.hover },
-          }}
-          onClick={(e) => setUserMenuAnchor(e.currentTarget as HTMLElement)}
-        >
-          <UserAvatar name={session?.user?.name} email={session?.user?.email} />
-          {showLabels && (
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.8rem", lineHeight: 1.2 }} noWrap>
-                {session?.user?.name || session?.user?.email || "User"}
-              </Typography>
-              <Typography variant="caption" sx={{ color: "text.disabled", fontSize: "0.68rem", textTransform: "capitalize" }} noWrap>
-                {String(session?.user?.role || "Admin").toLowerCase()}
-              </Typography>
-            </Box>
-          )}
-          {showLabels && (
-            <Tooltip title={userMenuAnchor ? "Close menu" : "Account menu"}>
-              <IconButton size="small" sx={{ color: "text.secondary", p: 0.5 }} onClick={(e) => {
-                e.stopPropagation()
-                setUserMenuAnchor((prev) => (prev ? null : e.currentTarget))
-              }}>
-                <KeyboardArrowDownIcon
-                  fontSize="small"
-                  sx={{ transition: "transform .2s ease", transform: userMenuAnchor ? "rotate(180deg)" : "none" }}
-                />
-              </IconButton>
-            </Tooltip>
-          )}
-          {!showLabels && (
-            <Tooltip title="Account options" placement="right" arrow>
-              <IconButton size="small" sx={{ color: "text.secondary", p: 0.5 }}>
-                <KeyboardArrowDownIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Box>
-
-        {!isMobile && (
-          <Box sx={{ mt: 1, display: "flex", justifyContent: showLabels ? "flex-end" : "center" }}>
-            <Tooltip title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"} placement="top">
-              <IconButton
-                size="small"
-                onClick={toggleSidebar}
-                sx={{
-                  color: "text.secondary",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  "&:hover": { bgcolor: theme.palette.action.selected },
-                }}
-              >
-                {sidebarOpen ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
-      </Box>
-
-      <Menu
-        anchorEl={userMenuAnchor}
-        open={Boolean(userMenuAnchor)}
-        onClose={() => setUserMenuAnchor(null)}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        transformOrigin={{ vertical: "bottom", horizontal: "right" }}
-        slotProps={{
-          paper: {
-            sx: { minWidth: 200, mt: 0.5, borderRadius: 2, boxShadow: theme.shadows[6] },
-          },
-        }}
-      >
-        <Box sx={{ px: 2, py: 1.25 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3 }} noWrap>
-            {session?.user?.name || session?.user?.email || "User"}
-          </Typography>
-          <Typography variant="caption" sx={{ color: "text.disabled" }} noWrap>
-            {session?.user?.email}
-          </Typography>
-        </Box>
-        <Divider />
-        <MenuItem disabled onClick={() => setUserMenuAnchor(null)} sx={{ gap: 1.5, py: 1 }}>
-          <SettingsIcon fontSize="small" sx={{ color: "text.secondary" }} />
-          Settings
-          <Typography variant="caption" sx={{ ml: "auto", color: "text.disabled" }}>Soon</Typography>
-        </MenuItem>
-        <MenuItem onClick={() => { setUserMenuAnchor(null); signOut() }} sx={{ gap: 1.5, py: 1, color: "error.main" }}>
-          <LogoutIcon fontSize="small" />
-          Sign out
-        </MenuItem>
-      </Menu>
-    </Box>
+      </div>
+    </div>
   )
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        minHeight: "100vh",
-        bgcolor: "grey.50",
-        background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.04)} 0%, transparent 300px), ${theme.palette.grey[50]}`,
-      }}
-    >
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          zIndex: (t) => t.zIndex.drawer + 1,
-          bgcolor: alpha("#fff", 0.85),
-          color: "text.primary",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-          borderBottom: "1px solid",
-          borderColor: "divider",
-        }}
+    <div className="flex min-h-screen bg-background">
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          "hidden lg:flex flex-col fixed left-0 top-0 h-full z-30 transition-all duration-200",
+          collapsed ? "w-16" : "w-56",
+        )}
       >
-        <Toolbar sx={{ minHeight: { xs: 56, md: 64 }, px: { xs: 1.5, sm: 2.5 } }}>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={isMobile ? () => setMobileOpen(!mobileOpen) : toggleSidebar}
-            sx={{ mr: 1.25, color: "text.secondary" }}
-          >
-            {isMobile ? <MenuIcon /> : sidebarOpen ? <MenuOpenIcon /> : <MenuIcon />}
-          </IconButton>
+        {sidebarContent}
+      </aside>
 
-          <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-            <Typography
-              variant="subtitle1"
-              noWrap
-              sx={{ fontWeight: 700, fontSize: "0.95rem", lineHeight: 1.2, letterSpacing: "-0.01em" }}
-            >
+      {/* Mobile drawer trigger */}
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetTrigger className="fixed top-3 left-3 z-20 lg:hidden inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-muted size-9">
+          <Menu className="size-5" />
+        </SheetTrigger>
+        <SheetContent side="left" className="w-64 p-0">
+          {sidebarContent}
+        </SheetContent>
+      </Sheet>
+
+      {/* Mobile top bar */}
+      <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background/80 backdrop-blur-sm px-4 lg:hidden">
+        <div className="flex size-7 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold shrink-0">
+          L
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold leading-tight">Loukdo Admin</p>
+          <p className="truncate text-[10px] text-muted-foreground leading-tight">
+            {currentItem?.label || "Dashboard"}
+          </p>
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => signOut()}>
+          <LogOut className="size-4" />
+        </Button>
+      </header>
+
+      {/* Main content */}
+      <main className={cn(
+        "flex-1 transition-all duration-200",
+        "lg:pl-56",
+        collapsed && "lg:pl-16",
+      )}>
+        <header className="hidden lg:flex sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background/80 backdrop-blur-sm px-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="text-muted-foreground"
+          >
+            {sidebarOpen ? <ChevronLeft className="size-5" /> : <Menu className="size-5" />}
+          </Button>
+
+          <div className="flex-1 min-w-0">
+            <h1 className="text-sm font-bold tracking-tight">
               {searchActive ? "Search" : (currentItem?.label || "Dashboard")}
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                display: { xs: "none", sm: "block" },
-                color: "text.disabled",
-                fontSize: "0.7rem",
-                lineHeight: 1.2,
-                textTransform: "capitalize",
-              }}
-              noWrap
-            >
+            </h1>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
               {currentItem ? `${currentItem.section} / ${currentItem.label}` : "Admin overview"}
-            </Typography>
-          </Box>
+            </p>
+          </div>
 
-          <Box
-            sx={{
-              display: { xs: "none", sm: "flex" },
-              alignItems: "center",
-              gap: 1,
-              px: 1.5,
-              width: 240,
-              height: 38,
-              ml: 2,
-              borderRadius: 2,
-              bgcolor: alpha("#000", 0.04),
-              border: "1px solid",
-              borderColor: alpha("#000", 0.06),
-              transition: theme.transitions.create(["background-color", "border-color", "box-shadow"]),
-              "&:focus-within": {
-                bgcolor: "#fff",
-                borderColor: "primary.main",
-                boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.15)}`,
-              },
-            }}
-          >
-            <SearchIcon sx={{ fontSize: 18, color: "text.disabled" }} />
-            <InputBase
-              placeholder="Search pages\u2026"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              inputProps={{ "aria-label": "Search pages" }}
-              sx={{ flex: 1, fontSize: "0.85rem" }}
-            />
-            {searchActive && (
-              <Tooltip title="Clear search">
-                <IconButton size="small" onClick={() => setSearchQuery("")} sx={{ p: 0.25 }}>
-                  <CloseIcon sx={{ fontSize: 15 }} />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Box>
+          <div className="flex items-center gap-2">
+            <div className="relative w-64">
+              <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search pages..."
+                className="pl-9 h-9 text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchActive && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-3" />
+                </button>
+              )}
+            </div>
+            <Button variant="ghost" size="icon" className="text-muted-foreground relative">
+              <Bell className="size-4" />
+              <span className="absolute top-2 right-2 size-1.5 rounded-full bg-destructive" />
+            </Button>
+            <Separator orientation="vertical" className="h-6 mx-1" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2 px-2 h-9">
+                  <div className="flex size-7 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-muted-foreground">
+                    {getInitials(session?.user?.name || session?.user?.username || "U")}
+                  </div>
+                  <div className="hidden md:block text-left">
+                    <p className="text-xs font-medium leading-none">{session?.user?.name || session?.user?.email}</p>
+                    <p className="text-[10px] text-muted-foreground capitalize leading-tight">{(session?.user as { role?: string })?.role?.toLowerCase() || "admin"}</p>
+                  </div>
+                  <ChevronDown className="size-3 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{session?.user?.name || session?.user?.email}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{session?.user?.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled className="flex items-center gap-2">
+                  <Settings className="size-4" />
+                  Settings
+                  <span className="ml-auto text-[10px] text-muted-foreground">Soon</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => signOut()}
+                  className="flex items-center gap-2 text-destructive focus:text-destructive"
+                >
+                  <LogOut className="size-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, ml: 1 }}>
-            <Tooltip title="Notifications">
-              <IconButton size="small" sx={{ color: "text.secondary" }}>
-                <Badge color="error" variant="dot" overlap="circular" sx={{ "& .MuiBadge-dot": { minWidth: 7, height: 7 } }}>
-                  <NotificationsNoneIcon sx={{ fontSize: 21 }} />
-                </Badge>
-              </IconButton>
-            </Tooltip>
-            <Divider orientation="vertical" flexItem sx={{ mx: 0.5, display: { xs: "none", sm: "block" } }} />
-            <Box
-              sx={{
-                display: { xs: "none", sm: "flex" },
-                alignItems: "center",
-                gap: 1,
-                pl: 0.5,
-                pr: 1,
-                py: 0.5,
-                borderRadius: 2,
-                cursor: "pointer",
-                transition: "background-color .2s ease",
-                "&:hover": { bgcolor: theme.palette.action.hover },
-              }}
-              onClick={(e) => setUserMenuAnchor(e.currentTarget as HTMLElement)}
-            >
-              <UserAvatar name={session?.user?.name} email={session?.user?.email} size={30} />
-              <Box sx={{ display: { md: "block", xs: "none" }, lineHeight: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.78rem", lineHeight: 1.2 }} noWrap>
-                  {session?.user?.name || session?.user?.email}
-                </Typography>
-                <Typography variant="caption" sx={{ color: "text.disabled", fontSize: "0.65rem", textTransform: "capitalize", display: "block" }}>
-                  {String(session?.user?.role || "Admin").toLowerCase()}
-                </Typography>
-              </Box>
-              <KeyboardArrowDownIcon sx={{ fontSize: 16, color: "text.disabled" }} />
-            </Box>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      <Menu
-        anchorEl={userMenuAnchor}
-        open={Boolean(userMenuAnchor)}
-        onClose={() => setUserMenuAnchor(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        slotProps={{
-          paper: {
-            sx: { minWidth: 220, mt: 1, borderRadius: 2, boxShadow: theme.shadows[8] },
-          },
-        }}
-      >
-        <Box sx={{ px: 2, py: 1.25 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3 }} noWrap>
-            {session?.user?.name || session?.user?.email || "User"}
-          </Typography>
-          <Typography variant="caption" color="text.disabled" noWrap>
-            {session?.user?.email}
-          </Typography>
-        </Box>
-        <Divider />
-        <MenuItem disabled sx={{ gap: 1.5, py: 1 }}>
-          <SettingsIcon fontSize="small" sx={{ color: "text.secondary" }} />
-          Settings
-          <Typography variant="caption" sx={{ ml: "auto", color: "text.disabled" }}>Soon</Typography>
-        </MenuItem>
-        <MenuItem onClick={() => { setUserMenuAnchor(null); signOut() }} sx={{ gap: 1.5, py: 1, color: "error.main" }}>
-          <LogoutIcon fontSize="small" />
-          Sign out
-        </MenuItem>
-      </Menu>
-
-      {isMobile ? (
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={() => setMobileOpen(false)}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            "& .MuiDrawer-paper": {
-              width: DRAWER_WIDTH,
-              boxSizing: "border-box",
-              borderRadius: 0,
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
-      ) : (
-        <Drawer
-          variant="permanent"
-          sx={{
-            width: sidebarOpen ? DRAWER_WIDTH : DRAWER_COLLAPSED,
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
-              width: sidebarOpen ? DRAWER_WIDTH : DRAWER_COLLAPSED,
-              boxSizing: "border-box",
-              transition: (t) => t.transitions.create("width", {
-                easing: t.transitions.easing.easeInOut,
-                duration: t.transitions.duration.enteringScreen,
-              }),
-              overflowX: "hidden",
-              overflowY: "hidden",
-              borderRight: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
-      )}
-
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, md: 3 }, maxWidth: "100vw", minWidth: 0 }}>
-        <Toolbar />
-        {children}
-      </Box>
-    </Box>
+        <div className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:pt-6">
+          {children}
+        </div>
+      </main>
+    </div>
   )
 }

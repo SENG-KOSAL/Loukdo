@@ -29,6 +29,10 @@ import { Separator } from "@/components/ui/separator"
 import DashboardLayout from "@/components/layouts/DashboardLayout"
 import { apiClient } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 interface Branch {
   id: string
@@ -64,7 +68,7 @@ function SkeletonRow() {
     <TableRow>
       {Array.from({ length: 6 }).map((_, i) => (
         <TableCell key={i}>
-          <div className="h-4 w-full animate-pulse rounded bg-muted" style={{ width: i === 5 ? "64px" : i === 4 ? "64px" : i === 0 ? "64px" : "100%" }} />
+          <Skeleton className={i === 5 ? "h-4 w-16" : i === 4 ? "h-4 w-16" : i === 0 ? "h-4 w-16" : "h-4 w-full"} />
         </TableCell>
       ))}
     </TableRow>
@@ -75,22 +79,22 @@ function SkeletonCard() {
   return (
     <Card className="p-5 space-y-4">
       <div className="flex items-center gap-3">
-        <div className="size-10 animate-pulse rounded-full bg-muted" />
+        <Skeleton variant="circle" className="size-10" />
         <div className="flex-1 space-y-2">
-          <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
-          <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-3 w-1/3" />
         </div>
       </div>
       <div className="space-y-2">
-        <div className="h-8 w-full animate-pulse rounded bg-muted" />
-        <div className="h-6 w-1/2 animate-pulse rounded bg-muted" />
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-6 w-1/2" />
       </div>
       <Separator />
       <div className="flex justify-between items-center">
-        <div className="h-5 w-16 animate-pulse rounded bg-muted" />
+        <Skeleton className="h-5 w-16" />
         <div className="flex gap-2">
-          <div className="size-7 animate-pulse rounded bg-muted" />
-          <div className="size-7 animate-pulse rounded bg-muted" />
+          <Skeleton className="size-7" />
+          <Skeleton className="size-7" />
         </div>
       </div>
     </Card>
@@ -103,7 +107,7 @@ export default function BranchesPage() {
   const [search, setSearch] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
-  
+
   // Dialog / State controllers
   const [open, setOpen] = useState(false)
   const [creating, setCreating] = useState(false)
@@ -439,7 +443,7 @@ export default function BranchesPage() {
                   {/* Access Connection URL field */}
                   <div className="mt-3.5 space-y-1.5">
                     <div className="text-[11px] font-semibold tracking-wider text-muted-foreground/80 uppercase">Access Login Link</div>
-                    <div 
+                    <div
                       className="group/link flex items-center justify-between gap-2 rounded-lg bg-muted/60 p-2 border hover:bg-muted transition-colors cursor-pointer"
                       onClick={(e) => handleCopyUrl(e, b.code)}
                       title="Click to copy Login URL"
@@ -534,7 +538,7 @@ export default function BranchesPage() {
                       </div>
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      <div 
+                      <div
                         className="inline-flex items-center justify-between gap-2 rounded-md bg-muted/60 hover:bg-muted p-1 px-2 border cursor-pointer max-w-[220px]"
                         onClick={(e) => handleCopyUrl(e, b.code)}
                         title="Click to copy Login URL"
@@ -629,7 +633,7 @@ export default function BranchesPage() {
             >
               <ChevronLeft className="size-3.5" />
             </Button>
-            
+
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const start = Math.max(1, Math.min(safePage - 2, totalPages - 4))
               const p = start + i
@@ -691,12 +695,12 @@ export default function BranchesPage() {
                 <Label htmlFor="name" className="text-xs font-semibold text-foreground/85">
                   Branch Name <span className="text-destructive">*</span>
                 </Label>
-                <Input 
-                  id="name" 
-                  value={form.name} 
-                  onChange={(e) => updateName(e.target.value)} 
-                  required 
-                  placeholder="e.g. Downtown Store" 
+                <Input
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => updateName(e.target.value)}
+                  required
+                  placeholder="e.g. Downtown Store"
                   className="shadow-xs focus-visible:ring-1 focus-visible:ring-primary"
                 />
               </div>
@@ -729,12 +733,12 @@ export default function BranchesPage() {
                 </Label>
                 <div className="relative">
                   <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
-                  <Input 
-                    id="adminUsername" 
+                  <Input
+                    id="adminUsername"
                     value={form.adminUsername}
-                    onChange={(e) => setForm({ ...form, adminUsername: e.target.value })} 
-                    required 
-                    placeholder="e.g. admin_downtown" 
+                    onChange={(e) => setForm({ ...form, adminUsername: e.target.value })}
+                    required
+                    placeholder="e.g. admin_downtown"
                     className="pl-9 shadow-xs"
                   />
                 </div>
@@ -745,13 +749,13 @@ export default function BranchesPage() {
                 </Label>
                 <div className="relative">
                   <Key className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
-                  <Input 
-                    id="adminPassword" 
-                    type="password" 
+                  <Input
+                    id="adminPassword"
+                    type="password"
                     value={form.adminPassword}
-                    onChange={(e) => setForm({ ...form, adminPassword: e.target.value })} 
-                    required 
-                    placeholder="Minimum 8 characters" 
+                    onChange={(e) => setForm({ ...form, adminPassword: e.target.value })}
+                    required
+                    placeholder="Minimum 8 characters"
                     className="pl-9 shadow-xs"
                   />
                 </div>
@@ -792,7 +796,7 @@ export default function BranchesPage() {
             <Button variant="outline" onClick={() => setOpen(false)} disabled={creating} className="h-9 font-medium">
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleCreate}
               disabled={!form.name || !form.adminUsername || !form.adminPassword || creating}
               className="h-9 font-medium gap-2 shadow-sm"
@@ -834,7 +838,7 @@ export default function BranchesPage() {
               <Separator />
               <div>
                 <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground/80 block">Access Login Link</span>
-                <div 
+                <div
                   onClick={() => {
                     const url = `${window.location.origin}/branch/${credentials?.code}/login`
                     navigator.clipboard.writeText(url)
@@ -935,15 +939,15 @@ export default function BranchesPage() {
               <Label htmlFor="dup-name" className="text-xs font-semibold text-foreground/85">
                 New Branch Name <span className="text-destructive">*</span>
               </Label>
-              <Input 
-                id="dup-name" 
+              <Input
+                id="dup-name"
                 value={dupForm.name}
-                onChange={(e) => setDupForm({ ...dupForm, name: e.target.value })} 
-                placeholder="e.g. Downtown Store (copy)" 
+                onChange={(e) => setDupForm({ ...dupForm, name: e.target.value })}
+                placeholder="e.g. Downtown Store (copy)"
                 className="shadow-xs"
               />
             </div>
-            
+
             <Separator />
 
             <div className="space-y-3">
@@ -954,11 +958,11 @@ export default function BranchesPage() {
                 </Label>
                 <div className="relative">
                   <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
-                  <Input 
-                    id="dup-username" 
+                  <Input
+                    id="dup-username"
                     value={dupForm.adminUsername}
-                    onChange={(e) => setDupForm({ ...dupForm, adminUsername: e.target.value })} 
-                    placeholder="e.g. admin_newstore" 
+                    onChange={(e) => setDupForm({ ...dupForm, adminUsername: e.target.value })}
+                    placeholder="e.g. admin_newstore"
                     className="pl-9 shadow-xs"
                   />
                 </div>
@@ -969,12 +973,12 @@ export default function BranchesPage() {
                 </Label>
                 <div className="relative">
                   <Key className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
-                  <Input 
-                    id="dup-password" 
-                    type="password" 
+                  <Input
+                    id="dup-password"
+                    type="password"
                     value={dupForm.adminPassword}
-                    onChange={(e) => setDupForm({ ...dupForm, adminPassword: e.target.value })} 
-                    placeholder="Minimum 8 characters" 
+                    onChange={(e) => setDupForm({ ...dupForm, adminPassword: e.target.value })}
+                    placeholder="Minimum 8 characters"
                     className="pl-9 shadow-xs"
                   />
                 </div>
@@ -986,7 +990,7 @@ export default function BranchesPage() {
             <Button variant="outline" onClick={() => setDuplicateTarget(null)} disabled={duplicating} className="h-9 font-medium">
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleDuplicate}
               disabled={!dupForm.name || !dupForm.adminUsername || !dupForm.adminPassword || duplicating}
               className="h-9 font-medium gap-2 shadow-sm"
@@ -1024,7 +1028,7 @@ export default function BranchesPage() {
                       <span className="font-mono text-[10px] tracking-widest font-bold text-muted-foreground bg-muted p-1 px-1.5 rounded border leading-none">
                         {detail.code}
                       </span>
-                      <Badge className={cn("gap-1 px-2 py-0.5 shadow-none border text-[10px] select-none scale-95", statusConfig[detail.status].bg)}>
+                      <Badge className={cn("gap-1 px-2 py-0.5 shadow-none border text-[10px] uppercase font-bold py-0 shadow-none border-primary/20 bg-primary/5 text-primary scale-95", statusConfig[detail.status].bg)}>
                         <span className={cn("size-1.5 rounded-full", statusConfig[detail.status].dot)} />
                         {statusConfig[detail.status].label}
                       </Badge>
@@ -1140,15 +1144,15 @@ export default function BranchesPage() {
 
               {/* Slide-over Footer Actions */}
               <div className="p-6 border-t bg-muted/20 mt-auto flex gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => openDuplicate(detail)}
                   className="flex-1 font-medium gap-1.5 h-10 shadow-xs"
                 >
                   <Copy className="size-4 text-muted-foreground" /> Clone Location
                 </Button>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   onClick={() => setDeleteTarget(detail)}
                   className="flex-1 font-medium gap-1.5 h-10 shadow-xs"
                 >

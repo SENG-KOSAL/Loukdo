@@ -2,8 +2,8 @@
 
 import { Package, Plus } from "lucide-react"
 import BranchLayout from "@/components/layouts/BranchLayout"
-import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export default function ProductsPage() {
   return (
@@ -17,11 +17,11 @@ export default function ProductsPage() {
           <Plus className="size-4" /> Add Product
         </Button>
       </div>
-      <Card className="p-12 flex flex-col items-center justify-center border-dashed">
-        <Package className="size-12 text-muted-foreground/30 mb-3" />
-        <h3 className="font-semibold text-lg text-muted-foreground/70">No products yet</h3>
-        <p className="text-sm text-muted-foreground mt-1">Products will appear here once added.</p>
-      </Card>
+      <EmptyState
+        title="No products yet"
+        description="Products will appear here once added."
+        icon={<Package className="size-12 text-muted-foreground/30" />}
+      />
     </BranchLayout>
   )
 }

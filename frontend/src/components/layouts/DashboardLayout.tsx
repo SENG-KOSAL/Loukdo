@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Storefront, Building2, Package,
   Receipt, Users, Menu, LogOut, Settings,
   Search, X, Bell, ChevronLeft, ChevronRight,
-  ChevronDown,
+  ChevronDown, Tags, Boxes,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -30,16 +30,19 @@ const navSections = [
     label: "Main",
     items: [
       { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/admin" },
-      { label: "POS", icon: Storefront, href: "/dashboard/pos" },
+      { label: "POS", icon: Storefront, href: "/dashboard/admin/pos" },
     ],
   },
   {
     label: "Management",
     items: [
       { label: "Branches", icon: Building2, href: "/dashboard/admin/branches" },
-      { label: "Products", icon: Package, href: "/dashboard/products" },
-      { label: "Orders", icon: Receipt, href: "/dashboard/orders" },
-      { label: "Customers", icon: Users, href: "/dashboard/customers" },
+      { label: "Products", icon: Package, href: "/dashboard/admin/products" },
+      { label: "Categories", icon: Tags, href: "/dashboard/admin/categories" },
+      { label: "Inventory", icon: Boxes, href: "/dashboard/admin/inventory" },
+      { label: "Sales", icon: Receipt, href: "/dashboard/admin/sales" },
+      { label: "Users", icon: Users, href: "/dashboard/admin/users" },
+      { label: "Settings", icon: Settings, href: "/dashboard/admin/settings" },
     ],
   },
 ]

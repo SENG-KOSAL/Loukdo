@@ -20,7 +20,13 @@ export const createBranchSchema = z.object({
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]).default("ACTIVE"),
 })
 
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+})
+
 export type BranchInput = z.infer<typeof createBranchSchema>
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
 
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>

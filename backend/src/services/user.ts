@@ -5,6 +5,17 @@ export async function findUserByUsername(username: string) {
   return prisma.user.findUnique({ where: { username } })
 }
 
+export async function findUserById(id: string) {
+  return prisma.user.findUnique({ where: { id } })
+}
+
+export async function updateUserPassword(id: string, newPassword: string) {
+  return prisma.user.update({
+    where: { id },
+    data: { password: hash(newPassword) },
+  })
+}
+
 export async function createBranchAdmin(data: {
   branchId: string
   username: string
@@ -23,4 +34,11 @@ export async function createBranchAdmin(data: {
 
 export async function getUsersByBranch(branchId: string) {
   return prisma.user.findMany({ where: { branchId } })
+}
+
+export async function getAllUsers() {
+  return prisma.user.findMany({
+    include: { branch: { select: { id: true, name: true, code: true } } },
+    orderBy: { createdAt: "desc" },
+  })
 }

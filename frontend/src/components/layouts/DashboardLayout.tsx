@@ -5,10 +5,10 @@ import { useParams, usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
 import {
-  LayoutDashboard, Storefront, Building2, Package,
-  Receipt, Users, Menu, LogOut, Settings,
+  LayoutDashboard, Building2,
+  Users, Menu, LogOut, Settings,
   Search, X, Bell, ChevronLeft, ChevronRight,
-  ChevronDown, Tags, Boxes,
+  ChevronDown,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -30,17 +30,12 @@ const navSections = [
     label: "Main",
     items: [
       { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/admin" },
-      { label: "POS", icon: Storefront, href: "/dashboard/admin/pos" },
     ],
   },
   {
     label: "Management",
     items: [
       { label: "Branches", icon: Building2, href: "/dashboard/admin/branches" },
-      { label: "Products", icon: Package, href: "/dashboard/admin/products" },
-      { label: "Categories", icon: Tags, href: "/dashboard/admin/categories" },
-      { label: "Inventory", icon: Boxes, href: "/dashboard/admin/inventory" },
-      { label: "Sales", icon: Receipt, href: "/dashboard/admin/sales" },
       { label: "Users", icon: Users, href: "/dashboard/admin/users" },
       { label: "Settings", icon: Settings, href: "/dashboard/admin/settings" },
     ],

@@ -1,5 +1,24 @@
 import prisma from "./prisma"
 import { hash } from "./password"
+import type { Role } from "../generated/prisma"
+
+export type UserInput = {
+  name?: string | null
+  username: string
+  email: string
+  password: string
+  role: Role
+  branchId?: string | null
+}
+
+export type UserUpdateInput = {
+  name?: string | null
+  username?: string
+  email?: string
+  password?: string
+  role?: Role
+  branchId?: string | null
+}
 
 export async function findUserByUsername(username: string) {
   return prisma.user.findUnique({ where: { username } })
@@ -33,7 +52,11 @@ export async function createBranchAdmin(data: {
 }
 
 export async function getUsersByBranch(branchId: string) {
-  return prisma.user.findMany({ where: { branchId } })
+  return prisma.user.findMany({
+    where: { branchId },
+    include: { branch: { select: { id: true, name: true, code: true } } },
+    orderBy: { createdAt: "desc" },
+  })
 }
 
 export async function getAllUsers() {
@@ -41,4 +64,32 @@ export async function getAllUsers() {
     include: { branch: { select: { id: true, name: true, code: true } } },
     orderBy: { createdAt: "desc" },
   })
+}
+
+export async function createUser(data: UserInput) {
+  return prisma.user.create({
+    data: {
+      ...data,
+      name: data.name || null,
+      branchId: data.branchId || null,
+      password: hash(data.password),
+    },
+    include: { branch: { select: { id: true, name: true, code: true } } },
+  })
+}
+
+export async function updateUser(id: string, data: UserUpdateInput) {
+  const { password, ...fields } = data
+  return prisma.user.update({
+    where: { id },
+    data: {
+      ...fields,
+      ...(password ? { password: hash(password) } : {}),
+    },
+    include: { branch: { select: { id: true, name: true, code: true } } },
+  })
+}
+
+export async function deleteUser(id: string) {
+  return prisma.user.delete({ where: { id } })
 }

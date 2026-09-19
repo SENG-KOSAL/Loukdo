@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Users, RefreshCw, Search, ShieldCheck, Store } from "lucide-react"
+import { Users, RefreshCw, Search, ShieldCheck, Store, UserPlus, Pencil, Trash2 } from "lucide-react"
 import DashboardLayout from "@/components/layouts/DashboardLayout"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,6 +13,7 @@ import {
 import { EmptyState } from "@/components/ui/empty-state"
 import { apiClient } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
+import { UserFormDialog, type BranchOption, type EditableUser } from "@/components/users/UserFormDialog"
 
 interface AppUser {
   id: string
@@ -37,6 +38,9 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [search, setSearch] = useState("")
+  const [branches, setBranches] = useState<BranchOption[]>([])
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editing, setEditing] = useState<EditableUser | null>(null)
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -52,6 +56,18 @@ export default function AdminUsersPage() {
   }, [])
 
   useEffect(() => { fetchUsers() }, [fetchUsers])
+  useEffect(() => { apiClient<BranchOption[]>("/v1/branches").then(setBranches).catch(() => setError("Failed to load branches")) }, [])
+
+  async function saveUser(data: Record<string, string | null>) {
+    await apiClient(`/v1/users${editing ? `/${editing.id}` : ""}`, { method: editing ? "PATCH" : "POST", body: JSON.stringify(data) })
+    await fetchUsers()
+  }
+
+  async function removeUser(user: AppUser) {
+    if (!window.confirm(`Delete ${user.name || user.username}? This cannot be undone.`)) return
+    try { await apiClient(`/v1/users/${user.id}`, { method: "DELETE" }); await fetchUsers() }
+    catch (err) { setError(err instanceof Error ? err.message : "Failed to delete user") }
+  }
 
   const q = search.trim().toLowerCase()
   const filtered = q
@@ -72,9 +88,7 @@ export default function AdminUsersPage() {
             Every user across all branches
           </p>
         </div>
-        <Button variant="outline" size="icon" onClick={fetchUsers} disabled={loading}>
-          <RefreshCw className={cn("size-4", loading && "animate-spin")} />
-        </Button>
+        <div className="flex gap-2"><Button variant="outline" size="icon" onClick={fetchUsers} disabled={loading}><RefreshCw className={cn("size-4", loading && "animate-spin")} /></Button><Button onClick={() => { setEditing(null); setDialogOpen(true) }}><UserPlus className="size-4" /> Add user</Button></div>
       </div>
 
       {error && (
@@ -126,6 +140,7 @@ export default function AdminUsersPage() {
                 <TableHead>Role</TableHead>
                 <TableHead>Branch</TableHead>
                 <TableHead>Joined</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -163,12 +178,14 @@ export default function AdminUsersPage() {
                       month: "short", day: "numeric", year: "numeric",
                     })}
                   </TableCell>
+                  <TableCell className="text-right"><div className="flex justify-end gap-1"><Button variant="ghost" size="icon-sm" aria-label={`Edit ${u.username}`} onClick={() => { setEditing(u); setDialogOpen(true) }}><Pencil className="size-4" /></Button><Button variant="ghost" size="icon-sm" aria-label={`Delete ${u.username}`} className="text-destructive hover:text-destructive" onClick={() => removeUser(u)}><Trash2 className="size-4" /></Button></div></TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
       </Card>
+      <UserFormDialog open={dialogOpen} onOpenChange={setDialogOpen} user={editing} branches={branches} allowedRoles={["SUPER_ADMIN", "BRANCH_ADMIN", "MANAGER", "CASHIER"]} onSubmit={saveUser} />
     </DashboardLayout>
   )
 }

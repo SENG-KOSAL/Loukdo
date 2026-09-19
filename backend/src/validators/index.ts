@@ -25,8 +25,30 @@ export const changePasswordSchema = z.object({
   newPassword: z.string().min(6, "New password must be at least 6 characters"),
 })
 
+const userRoleSchema = z.enum(["SUPER_ADMIN", "BRANCH_ADMIN", "MANAGER", "CASHIER"])
+
+export const createUserSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100),
+  username: z.string().trim().min(1, "Username is required").max(50),
+  email: z.string().trim().email("A valid email is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  role: userRoleSchema,
+  branchId: z.string().cuid().nullable().optional(),
+})
+
+export const updateUserSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100).optional(),
+  username: z.string().trim().min(1, "Username is required").max(50).optional(),
+  email: z.string().trim().email("A valid email is required").optional(),
+  password: z.string().min(6, "Password must be at least 6 characters").optional(),
+  role: userRoleSchema.optional(),
+  branchId: z.string().cuid().nullable().optional(),
+}).refine((value) => Object.keys(value).length > 0, "At least one field is required")
+
 export type BranchInput = z.infer<typeof createBranchSchema>
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
+export type CreateUserInput = z.infer<typeof createUserSchema>
+export type UpdateUserInput = z.infer<typeof updateUserSchema>
 
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>

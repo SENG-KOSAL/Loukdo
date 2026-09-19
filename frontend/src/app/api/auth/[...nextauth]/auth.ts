@@ -100,6 +100,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
+        token.id = user.id
         token.username = user.username
         token.role = user.role
         token.branchId = user.branchId
@@ -108,7 +109,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token
     },
     session({ session, token }) {
-      const t = token as { username?: string; role?: string; branchId?: string; branchCode?: string }
+      const t = token as { id?: string; username?: string; role?: string; branchId?: string; branchCode?: string }
       return { ...session, user: { ...session.user, ...t } }
     },
   },

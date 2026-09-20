@@ -50,5 +50,59 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
 export type CreateUserInput = z.infer<typeof createUserSchema>
 export type UpdateUserInput = z.infer<typeof updateUserSchema>
 
+export const createCategorySchema = z.object({
+  name: z.string().trim().min(1, "Category name is required").max(100),
+  desc: z.string().trim().max(500).nullable().optional(),
+  active: z.boolean().optional(),
+  branchId: z.string().cuid().nullable().optional(),
+})
+
+export const updateCategorySchema = z.object({
+  name: z.string().trim().min(1, "Category name is required").max(100).optional(),
+  desc: z.string().trim().max(500).nullable().optional(),
+  active: z.boolean().optional(),
+}).refine((value) => Object.keys(value).length > 0, "At least one field is required")
+
+export type CreateCategoryInput = z.infer<typeof createCategorySchema>
+export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>
+
+export const createProductSchema = z.object({
+  name: z.string().trim().min(1, "Product name is required").max(150),
+  description: z.string().trim().max(1000).nullable().optional(),
+  price: z.coerce.number().min(0, "Price must be 0 or more"),
+  cost: z.coerce.number().min(0, "Cost must be 0 or more").optional(),
+  sku: z.string().trim().max(50).nullable().optional(),
+  barcode: z.string().trim().max(50).nullable().optional(),
+  taxable: z.boolean().optional(),
+  active: z.boolean().optional(),
+  categoryId: z.string().cuid().nullable().optional(),
+  branchId: z.string().cuid().nullable().optional(),
+  initialQuantity: z.coerce.number().int().min(0).optional(),
+  minStock: z.coerce.number().int().min(0).optional(),
+})
+
+export const updateProductSchema = z.object({
+  name: z.string().trim().min(1, "Product name is required").max(150).optional(),
+  description: z.string().trim().max(1000).nullable().optional(),
+  price: z.coerce.number().min(0, "Price must be 0 or more").optional(),
+  cost: z.coerce.number().min(0, "Cost must be 0 or more").optional(),
+  sku: z.string().trim().max(50).nullable().optional(),
+  barcode: z.string().trim().max(50).nullable().optional(),
+  taxable: z.boolean().optional(),
+  active: z.boolean().optional(),
+  categoryId: z.string().cuid().nullable().optional(),
+}).refine((value) => Object.keys(value).length > 0, "At least one field is required")
+
+export type CreateProductInput = z.infer<typeof createProductSchema>
+export type UpdateProductInput = z.infer<typeof updateProductSchema>
+
+export const updateInventorySchema = z.object({
+  quantity: z.coerce.number().int().min(0, "Quantity cannot be negative").optional(),
+  minStock: z.coerce.number().int().min(0, "Minimum stock cannot be negative").optional(),
+  adjustBy: z.coerce.number().int().optional(),
+}).refine((value) => Object.keys(value).length > 0, "At least one field is required")
+
+export type UpdateInventoryInput = z.infer<typeof updateInventorySchema>
+
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>

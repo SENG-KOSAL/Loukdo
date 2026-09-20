@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { apiClient } from "@/lib/api-client"
+import { RolePermissionsCard } from "@/components/settings/RolePermissionsCard"
 
 export default function AdminSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("")
@@ -116,6 +117,10 @@ export default function AdminSettingsPage() {
             </Button>
           </form>
         </Card>
+      </div>
+
+      <div className="mt-6">
+        <RolePermissionsCard />
       </div>
     </DashboardLayout>
   )

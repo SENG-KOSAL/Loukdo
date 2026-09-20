@@ -2,15 +2,12 @@ import { NextResponse } from "next/server"
 import { auth } from "@/app/api/auth/[...nextauth]/auth"
 import { createProduct, getAllProducts, getProductsByBranch } from "@loukdo/backend/services/product"
 import { createProductSchema } from "@loukdo/backend/validators"
-import { hasAnyRole, hasRole, ROLES, type AccessUser } from "@loukdo/backend/services/access"
+import { hasRole, ROLES, type AccessUser } from "@loukdo/backend/services/access"
+import { can } from "@loukdo/backend/services/permissions"
 
 function actor(sessionUser: AccessUser | undefined) {
   if (!sessionUser?.id || !sessionUser.role) return null
   return sessionUser
-}
-
-function canManageCatalog(user: AccessUser | null): boolean {
-  return hasAnyRole(user, ROLES.SUPER_ADMIN, ROLES.BRANCH_ADMIN, ROLES.MANAGER)
 }
 
 /**
@@ -58,7 +55,9 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await auth()
   const sessionUser = actor(session?.user as AccessUser | undefined)
-  if (!canManageCatalog(sessionUser)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (!sessionUser || !(await can(sessionUser.role, "products.manage"))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
 
   const parsed = createProductSchema.safeParse(await request.json())
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 })

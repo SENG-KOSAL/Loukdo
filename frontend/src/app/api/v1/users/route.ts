@@ -2,15 +2,16 @@ import { NextResponse } from "next/server"
 import { auth } from "@/app/api/auth/[...nextauth]/auth"
 import { createUser, getAllUsers, getUsersByBranch } from "@loukdo/backend/services/user"
 import { createUserSchema } from "@loukdo/backend/validators"
-import { hasAnyRole, hasRole, ROLES, type AccessUser } from "@loukdo/backend/services/access"
+import { hasRole, ROLES, type AccessUser } from "@loukdo/backend/services/access"
+import { can } from "@loukdo/backend/services/permissions"
 
 function actor(sessionUser: AccessUser | undefined) {
   if (!sessionUser?.id || !sessionUser.role) return null
   return sessionUser
 }
 
-function canManageUsers(user: AccessUser | null): boolean {
-  return hasAnyRole(user, ROLES.SUPER_ADMIN, ROLES.BRANCH_ADMIN)
+async function canManageUsers(user: AccessUser | null): Promise<boolean> {
+  return can(user?.role, "users.manage")
 }
 
 function canAssign(user: AccessUser, role: string, branchId: string | null | undefined): boolean {
@@ -45,7 +46,7 @@ export async function GET() {
   const session = await auth()
   const sessionUser = actor(session?.user as AccessUser | undefined)
 
-  if (!canManageUsers(sessionUser)) {
+  if (!(await canManageUsers(sessionUser))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
   if (!hasRole(sessionUser, ROLES.SUPER_ADMIN) && !sessionUser?.branchId) {
@@ -61,7 +62,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await auth()
   const sessionUser = actor(session?.user as AccessUser | undefined)
-  if (!canManageUsers(sessionUser)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (!(await canManageUsers(sessionUser))) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
   const parsed = createUserSchema.safeParse(await request.json())
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten().fieldErrors }, { status: 400 })

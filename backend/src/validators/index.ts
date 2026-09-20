@@ -104,5 +104,12 @@ export const updateInventorySchema = z.object({
 
 export type UpdateInventoryInput = z.infer<typeof updateInventorySchema>
 
+export const updateRolePermissionsSchema = z.object({
+  role: z.enum(["BRANCH_ADMIN", "MANAGER", "CASHIER"]),
+  permissions: z.record(z.string(), z.boolean()),
+})
+
+export type UpdateRolePermissionsInput = z.infer<typeof updateRolePermissionsSchema>
+
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>

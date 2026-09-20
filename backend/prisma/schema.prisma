@@ -116,6 +116,16 @@ model InventoryItem {
   @@unique([productId, branchId])
 }
 
+model RolePermission {
+  id         String   @id @default(cuid())
+  role       Role
+  permission String
+  allowed    Boolean  @default(true)
+  updatedAt  DateTime @updatedAt
+
+  @@unique([role, permission])
+}
+
 enum Role {
   SUPER_ADMIN
   BRANCH_ADMIN

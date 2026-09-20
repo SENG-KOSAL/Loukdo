@@ -2,15 +2,12 @@ import { NextResponse } from "next/server"
 import { auth } from "@/app/api/auth/[...nextauth]/auth"
 import { deleteProduct, findProductById, updateProduct } from "@loukdo/backend/services/product"
 import { updateProductSchema } from "@loukdo/backend/validators"
-import { hasAnyRole, hasRole, ROLES, type AccessUser } from "@loukdo/backend/services/access"
+import { hasRole, ROLES, type AccessUser } from "@loukdo/backend/services/access"
+import { can } from "@loukdo/backend/services/permissions"
 
 function actor(sessionUser: AccessUser | undefined) {
   if (!sessionUser?.id || !sessionUser.role) return null
   return sessionUser
-}
-
-function canManageCatalog(user: AccessUser | null): boolean {
-  return hasAnyRole(user, ROLES.SUPER_ADMIN, ROLES.BRANCH_ADMIN, ROLES.MANAGER)
 }
 
 function canTouch(user: AccessUser, targetBranchId: string): boolean {
@@ -21,7 +18,9 @@ function canTouch(user: AccessUser, targetBranchId: string): boolean {
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   const sessionUser = actor(session?.user as AccessUser | undefined)
-  if (!canManageCatalog(sessionUser)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (!sessionUser || !(await can(sessionUser.role, "products.manage"))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
 
   const { id } = await params
   const target = await findProductById(id)
@@ -42,7 +41,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   const sessionUser = actor(session?.user as AccessUser | undefined)
-  if (!canManageCatalog(sessionUser)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (!sessionUser || !(await can(sessionUser.role, "products.manage"))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
 
   const { id } = await params
   const target = await findProductById(id)

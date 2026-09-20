@@ -2,10 +2,11 @@ import { NextResponse } from "next/server"
 import { auth } from "@/app/api/auth/[...nextauth]/auth"
 import { deleteUser, findUserById, updateUser } from "@loukdo/backend/services/user"
 import { updateUserSchema } from "@loukdo/backend/validators"
-import { hasAnyRole, hasRole, ROLES, type AccessUser } from "@loukdo/backend/services/access"
+import { hasRole, ROLES, type AccessUser } from "@loukdo/backend/services/access"
+import { can } from "@loukdo/backend/services/permissions"
 
-function canManage(user: AccessUser | undefined) {
-  return hasAnyRole(user, ROLES.SUPER_ADMIN, ROLES.BRANCH_ADMIN)
+function canManage(user: AccessUser | undefined): Promise<boolean> {
+  return can(user?.role, "users.manage")
 }
 
 function canManageTarget(actor: AccessUser, target: { branchId: string | null }, role: string, branchId: string | null | undefined) {
@@ -22,7 +23,7 @@ function sanitize<T extends { password: string }>(user: T) {
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   const actor = session?.user as AccessUser | undefined
-  if (!actor?.id || !canManage(actor)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (!actor?.id || !(await canManage(actor))) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   const { id } = await params
   const target = await findUserById(id)
   if (!target) return NextResponse.json({ error: "User not found" }, { status: 404 })
@@ -45,7 +46,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   const actor = session?.user as AccessUser | undefined
-  if (!actor?.id || !canManage(actor)) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  if (!actor?.id || !(await canManage(actor))) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   const { id } = await params
   const target = await findUserById(id)
   if (!target) return NextResponse.json({ error: "User not found" }, { status: 404 })

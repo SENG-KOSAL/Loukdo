@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
 import { useParams } from "next/navigation"
 import { Package, Plus, Pencil, Trash2, RefreshCw } from "lucide-react"
 import BranchLayout from "@/components/layouts/BranchLayout"
@@ -11,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { apiClient } from "@/lib/api-client"
+import { usePermissions } from "@/hooks/usePermissions"
 import { type BranchOption } from "@/components/catalog/CategoryFormDialog"
 import { ProductFormDialog, type CategoryOption, type EditableProduct } from "@/components/catalog/ProductFormDialog"
 
@@ -21,7 +21,6 @@ type ProductRow = EditableProduct & {
 
 export default function BranchProductsPage() {
   const params = useParams()
-  const { data: session } = useSession()
   const branchCode = params.code as string
   const [branch, setBranch] = useState<BranchOption | null>(null)
   const [products, setProducts] = useState<ProductRow[]>([])
@@ -30,8 +29,8 @@ export default function BranchProductsPage() {
   const [error, setError] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<EditableProduct | null>(null)
-  const role = (session?.user as { role?: string } | undefined)?.role
-  const canManage = role === "BRANCH_ADMIN" || role === "MANAGER" || role === "SUPER_ADMIN"
+  const { can, error: permError } = usePermissions()
+  const canManage = can("products.manage")
 
   const load = useCallback(async () => {
     setLoading(true); setError("")
@@ -73,6 +72,11 @@ export default function BranchProductsPage() {
       </div>
 
       {error && <p className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
+      {permError && (
+        <p className="mb-4 rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          Couldn&apos;t verify your permissions ({permError}) — showing view-only. Refresh to try again.
+        </p>
+      )}
 
       <Card className="overflow-hidden">
         {loading ? (

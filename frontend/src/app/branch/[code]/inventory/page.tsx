@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
 import { useParams } from "next/navigation"
 import { Boxes, RefreshCw, PackageSearch } from "lucide-react"
 import BranchLayout from "@/components/layouts/BranchLayout"
@@ -11,19 +10,19 @@ import { Badge } from "@/components/ui/badge"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { apiClient } from "@/lib/api-client"
+import { usePermissions } from "@/hooks/usePermissions"
 import { InventoryAdjustDialog, type EditableInventory } from "@/components/catalog/InventoryAdjustDialog"
 
 export default function BranchInventoryPage() {
   const params = useParams()
-  const { data: session } = useSession()
   const branchCode = params.code as string
   const [items, setItems] = useState<EditableInventory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<EditableInventory | null>(null)
-  const role = (session?.user as { role?: string } | undefined)?.role
-  const canManage = role === "BRANCH_ADMIN" || role === "MANAGER" || role === "SUPER_ADMIN"
+  const { can, error: permError } = usePermissions()
+  const canManage = can("inventory.manage")
 
   const load = useCallback(async () => {
     setLoading(true); setError("")
@@ -55,6 +54,11 @@ export default function BranchInventoryPage() {
       </div>
 
       {error && <p className="mb-4 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>}
+      {permError && (
+        <p className="mb-4 rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          Couldn&apos;t verify your permissions ({permError}) — showing view-only. Refresh to try again.
+        </p>
+      )}
 
       <Card className="overflow-hidden">
         {loading ? (

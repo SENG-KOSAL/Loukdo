@@ -1,0 +1,248 @@
+{
+  "branches": [
+    {
+      "name": "Phnom Penh Central",
+      "code": "phnom-penh-central",
+      "url": "https://phnompenh.loukdo.com",
+      "adminName": "Sokha",
+      "adminEmail": "sokha@loukdo.com",
+      "status": "ACTIVE"
+    },
+    {
+      "name": "Siem Reap Market",
+      "code": "siem-reap-market",
+      "url": "https://siemreap.loukdo.com",
+      "adminName": "Dara",
+      "adminEmail": "dara@loukdo.com",
+      "status": "INACTIVE"
+    },
+    {
+      "name": "Battambang Store",
+      "code": "battambang-store",
+      "url": null,
+      "adminName": "Chenda",
+      "adminEmail": "chenda@loukdo.com",
+      "status": "SUSPENDED"
+    }
+  ],
+  "users": [
+    {
+      "name": "Super Admin",
+      "username": "superadmin",
+      "email": "superadmin@loukdo.com",
+      "password": "admin123",
+      "role": "SUPER_ADMIN",
+      "branchId": null
+    },
+    {
+      "name": "Sokha",
+      "username": "sokha_pp",
+      "email": "sokha_pp@loukdo.local",
+      "password": "admin123",
+      "role": "BRANCH_ADMIN",
+      "branchId": "__BRANCH_1__"
+    },
+    {
+      "name": "Meng",
+      "username": "meng_pp",
+      "email": "meng_pp@loukdo.local",
+      "password": "cash123",
+      "role": "CASHIER",
+      "branchId": "__BRANCH_1__"
+    },
+    {
+      "name": "Dara",
+      "username": "dara_sr",
+      "email": "dara_sr@loukdo.local",
+      "password": "admin123",
+      "role": "BRANCH_ADMIN",
+      "branchId": "__BRANCH_2__"
+    },
+    {
+      "name": "Chan",
+      "username": "chan_sr",
+      "email": "chan_sr@loukdo.local",
+      "password": "cash123",
+      "role": "CASHIER",
+      "branchId": "__BRANCH_2__"
+    },
+    {
+      "name": "Chenda",
+      "username": "chenda_bt",
+      "email": "chenda_bt@loukdo.local",
+      "password": "admin123",
+      "role": "BRANCH_ADMIN",
+      "branchId": "__BRANCH_3__"
+    },
+    {
+      "name": "Rith",
+      "username": "rith_bt",
+      "email": "rith_bt@loukdo.local",
+      "password": "cash123",
+      "role": "CASHIER",
+      "branchId": "__BRANCH_3__"
+    }
+  ],
+  "rolePermissions": [
+    {
+      "role": "SUPER_ADMIN",
+      "permission": "branches.manage",
+      "allowed": true
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "permission": "users.manage",
+      "allowed": true
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "permission": "products.manage",
+      "allowed": true
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "permission": "categories.manage",
+      "allowed": true
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "permission": "inventory.manage",
+      "allowed": true
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "permission": "sales.view",
+      "allowed": true
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "permission": "pos.access",
+      "allowed": true
+    },
+    {
+      "role": "SUPER_ADMIN",
+      "permission": "settings.manage",
+      "allowed": true
+    },
+    {
+      "role": "BRANCH_ADMIN",
+      "permission": "branches.manage",
+      "allowed": false
+    },
+    {
+      "role": "BRANCH_ADMIN",
+      "permission": "users.manage",
+      "allowed": true
+    },
+    {
+      "role": "BRANCH_ADMIN",
+      "permission": "products.manage",
+      "allowed": true
+    },
+    {
+      "role": "BRANCH_ADMIN",
+      "permission": "categories.manage",
+      "allowed": true
+    },
+    {
+      "role": "BRANCH_ADMIN",
+      "permission": "inventory.manage",
+      "allowed": true
+    },
+    {
+      "role": "BRANCH_ADMIN",
+      "permission": "sales.view",
+      "allowed": true
+    },
+    {
+      "role": "BRANCH_ADMIN",
+      "permission": "pos.access",
+      "allowed": true
+    },
+    {
+      "role": "BRANCH_ADMIN",
+      "permission": "settings.manage",
+      "allowed": false
+    },
+    {
+      "role": "MANAGER",
+      "permission": "branches.manage",
+      "allowed": false
+    },
+    {
+      "role": "MANAGER",
+      "permission": "users.manage",
+      "allowed": false
+    },
+    {
+      "role": "MANAGER",
+      "permission": "products.manage",
+      "allowed": true
+    },
+    {
+      "role": "MANAGER",
+      "permission": "categories.manage",
+      "allowed": true
+    },
+    {
+      "role": "MANAGER",
+      "permission": "inventory.manage",
+      "allowed": true
+    },
+    {
+      "role": "MANAGER",
+      "permission": "sales.view",
+      "allowed": true
+    },
+    {
+      "role": "MANAGER",
+      "permission": "pos.access",
+      "allowed": true
+    },
+    {
+      "role": "MANAGER",
+      "permission": "settings.manage",
+      "allowed": false
+    },
+    {
+      "role": "CASHIER",
+      "permission": "branches.manage",
+      "allowed": false
+    },
+    {
+      "role": "CASHIER",
+      "permission": "users.manage",
+      "allowed": false
+    },
+    {
+      "role": "CASHIER",
+      "permission": "products.manage",
+      "allowed": false
+    },
+    {
+      "role": "CASHIER",
+      "permission": "categories.manage",
+      "allowed": false
+    },
+    {
+      "role": "CASHIER",
+      "permission": "inventory.manage",
+      "allowed": false
+    },
+    {
+      "role": "CASHIER",
+      "permission": "sales.view",
+      "allowed": false
+    },
+    {
+      "role": "CASHIER",
+      "permission": "pos.access",
+      "allowed": true
+    },
+    {
+      "role": "CASHIER",
+      "permission": "settings.manage",
+      "allowed": false
+    }
+  ]
+}

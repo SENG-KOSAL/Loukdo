@@ -239,6 +239,7 @@ To test endpoints with **"Try it out"**, log in first at `/login` (or a branch l
 | `db:migrate`    | Create and apply migration  |
 | `db:studio`     | Open Prisma Studio UI       |
 | `db:seed`       | Run seed script             |
+| `db:clear`      | Clear all data from tables  |
 | `lint`          | Type-check backend          |
 
 ### Frontend (`npm run -w frontend <command>`)
@@ -250,6 +251,68 @@ To test endpoints with **"Try it out"**, log in first at `/login` (or a branch l
 | `start`   | Start production server   |
 | `lint`    | Run Next.js lint          |
 
+
+after create new schema
+npm run -w backend db:push
+
+## Reset & Reseed Database
+
+To completely reset the database and re-seed with fresh mock data:
+
+### Option 1: Using `prisma migrate reset` (recommended for schema changes)
+
+```bash
+npm run -w backend db:migrate -- --reset
+```
+
+This will:
+1. Drop all tables
+2. Re-apply all migrations
+3. Run the seed script (`db:seed`)
+
+When prompted, type `y` to confirm.
+
+### Option 2: Manual clear + reseed (preserves schema)
+
+```bash
+# 1. Clear all data without dropping tables (danger)
+npm run -w backend db:clear
+
+# 2. Re-seed with mock data
+npm run -w backend db:seed
+```
+
+### Option 3: Full reset with `db:push` (for development)
+
+```bash
+# Push schema changes without migrations
+npm run -w backend db:push
+
+# Clear and reseed
+npm run -w backend db:clear
+npm run -w backend db:seed
+```
+
+## Seed Data
+
+The seed script (`backend/prisma/seed.ts`) generates:
+
+- **3 branches** with Khmer/Cambodian retail context
+  - Phnom Penh Central (ACTIVE)
+  - Siem Reap Market (INACTIVE)
+  - Battambang Store (SUSPENDED)
+- **Users per branch**: 1 admin + 1–2 cashiers
+- **Categories**: 4–6 per branch (Cosmetics, Beverages, Food, Essentials, etc.)
+- **Products**: 6–11 per category with Khmer names
+- **Inventory**: stock quantities per product
+- **Sales**: 2–6 per branch with 1–4 items each
+- **Role permissions**: default permission matrix for all roles
+
+Seed data is defined in `backend/prisma/seed-data/seed.json`.
+
+To customize seed data, edit `backend/prisma/seed-data/seed.json` or modify the generators in `backend/prisma/seed.ts`.
+
+---
 
 after create new schema
 npm run -w backend db:push

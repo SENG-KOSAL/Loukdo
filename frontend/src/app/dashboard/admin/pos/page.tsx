@@ -9,7 +9,7 @@ export default function AdminPOSPage() {
   return (
     <DashboardLayout>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Point of Sale</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight">Point of Sale</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Process transactions from the admin console
         </p>

@@ -58,7 +58,7 @@ export default function BranchLayout({ children }: { children: React.ReactNode }
       <div className={cn("flex h-14 items-center border-b px-3", collapsed ? "justify-center" : "justify-between")}>
         {!collapsed && (
           <div className="flex items-center gap-2 min-w-0">
-            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white text-xs font-bold">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-white text-xs font-bold">
               L
             </div>
             <div className="min-w-0">
@@ -68,7 +68,7 @@ export default function BranchLayout({ children }: { children: React.ReactNode }
           </div>
         )}
         {collapsed && (
-          <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-600 text-white text-xs font-bold">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-white text-xs font-bold">
             L
           </div>
         )}
@@ -152,7 +152,7 @@ export default function BranchLayout({ children }: { children: React.ReactNode }
 
       {/* Mobile top bar */}
       <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background/80 backdrop-blur-sm px-4 lg:hidden">
-        <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-600 text-white text-xs font-bold shrink-0">
+        <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-white text-xs font-bold shrink-0">
           L
         </div>
         <div className="min-w-0 flex-1">

@@ -313,13 +313,14 @@ export default function AdminDashboard() {
                   <span className="text-xs font-medium">All Branches</span>
                 </Button>
               </Link>
-              <Button variant="outline" className="flex-col gap-2 py-5 h-auto" disabled>
-                <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-950/30">
-                  <Users className="size-4" />
-                </div>
-                <span className="text-xs font-medium">Users</span>
-                <span className="text-[10px] text-muted-foreground">Coming soon</span>
-              </Button>
+              <Link href="/dashboard/admin/users" className="contents">
+                <Button variant="outline" className="flex-col gap-2 py-5 h-auto">
+                  <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-950/30">
+                    <Users className="size-4" />
+                  </div>
+                  <span className="text-xs font-medium">Users</span>
+                </Button>
+              </Link>
               <Button variant="outline" className="flex-col gap-2 py-5 h-auto" disabled>
                 <div className="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-950/30">
                   <Activity className="size-4" />

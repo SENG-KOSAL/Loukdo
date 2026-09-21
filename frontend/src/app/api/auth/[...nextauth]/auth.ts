@@ -1,11 +1,11 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import prisma from "@loukdo/backend/services/prisma"
-import { verify } from "@/lib/password"
+import { hash, verify } from "@/lib/password"
 import { authConfig } from "./auth.config"
 
-const ADMIN_USERNAME = "admin"
-const ADMIN_PASSWORD = "admin"
+const DEFAULT_ADMIN_USERNAME = "admin"
+const DEFAULT_ADMIN_PASSWORD = "admin"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -27,13 +27,45 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!username || !password) return null
 
         if (loginType === "admin") {
-          if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) return null
-          return {
-            id: "admin-id",
-            name: "Administrator",
-            email: "admin@loukdo.com",
-            username: "admin",
-            role: "SUPER_ADMIN",
+          try {
+            // SUPER_ADMIN accounts live in the database so their password can
+            // be changed from Settings. On first-ever login with the default
+            // credentials, seed that record automatically.
+            let admin = await prisma.user.findFirst({
+              where: { role: "SUPER_ADMIN", username },
+            })
+
+            if (!admin) {
+              const anySuperAdmin = await prisma.user.findFirst({ where: { role: "SUPER_ADMIN" } })
+              const isDefaultLogin =
+                !anySuperAdmin &&
+                username === DEFAULT_ADMIN_USERNAME &&
+                password === DEFAULT_ADMIN_PASSWORD
+
+              if (!isDefaultLogin) return null
+
+              admin = await prisma.user.create({
+                data: {
+                  username: DEFAULT_ADMIN_USERNAME,
+                  email: "admin@loukdo.com",
+                  name: "Administrator",
+                  password: hash(DEFAULT_ADMIN_PASSWORD),
+                  role: "SUPER_ADMIN",
+                },
+              })
+            }
+
+            if (!verify(password, admin.password)) return null
+
+            return {
+              id: admin.id,
+              name: admin.name ?? admin.username,
+              email: admin.email,
+              username: admin.username,
+              role: admin.role as string,
+            }
+          } catch {
+            return null
           }
         }
 
@@ -68,6 +100,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     jwt({ token, user }) {
       if (user) {
+        token.id = user.id
         token.username = user.username
         token.role = user.role
         token.branchId = user.branchId
@@ -76,7 +109,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token
     },
     session({ session, token }) {
-      const t = token as { username?: string; role?: string; branchId?: string; branchCode?: string }
+      const t = token as { id?: string; username?: string; role?: string; branchId?: string; branchCode?: string }
       return { ...session, user: { ...session.user, ...t } }
     },
   },

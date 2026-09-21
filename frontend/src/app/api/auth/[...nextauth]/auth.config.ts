@@ -18,7 +18,7 @@ export const authConfig: NextAuthConfig = {
       return token
     },
     session({ session, token }) {
-      const t = token as { username?: string; role?: string; branchId?: string; branchCode?: string }
+      const t = token as { id?: string; username?: string; role?: string; branchId?: string; branchCode?: string }
       return { ...session, user: { ...session.user, ...t } }
     },
   },

@@ -2,10 +2,8 @@
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { User, Lock, LogIn, Eye, EyeOff, AlertCircle } from "lucide-react"
+import { LogIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Card,
   CardContent,
@@ -14,18 +12,15 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import Link from "next/link"
+import { LoginForm } from "@/components/auth/LoginForm"
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLogin = async ({ username, password }: { username: string; password: string }) => {
     setLoading(true)
-    setError("")
+    setError(null)
     const result = await signIn("credentials", { username, password, loginType: "admin", redirect: false })
     if (result?.error) {
       setError("Invalid username or password")
@@ -52,39 +47,11 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <div className="relative">
-                <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="username" type="text" placeholder="Enter your username"
-                  className="pl-9" value={username}
-                  onChange={(e) => setUsername(e.target.value)} required />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password" className="pl-9 pr-9"
-                  value={password} onChange={(e) => setPassword(e.target.value)} required />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </div>
-            </div>
-            {error && (
-              <div className="flex items-center gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                <AlertCircle className="size-4 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
+          <LoginForm
+            onSubmit={handleLogin}
+            isLoading={loading}
+            errorMessage={error}
+          />
           <div className="mt-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link href="/register" className="font-medium text-primary underline-offset-4 hover:underline">

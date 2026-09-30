@@ -255,62 +255,30 @@ To test endpoints with **"Try it out"**, log in first at `/login` (or a branch l
 after create new schema
 npm run -w backend db:push
 
-## Reset & Reseed Database
+## Seed Mock Data
 
-To completely reset the database and re-seed with fresh mock data:
-
-### Option 1: Using `prisma migrate reset` (recommended for schema changes)
+Run the seed command after the schema exists:
 
 ```bash
-npm run -w backend db:migrate -- --reset
-```
-
-This will:
-1. Drop all tables
-2. Re-apply all migrations
-3. Run the seed script (`db:seed`)
-
-When prompted, type `y` to confirm.
-
-### Option 2: Manual clear + reseed (preserves schema)
-
-```bash
-# 1. Clear all data without dropping tables (danger)
-npm run -w backend db:clear
-
-# 2. Re-seed with mock data
 npm run -w backend db:seed
 ```
 
-### Option 3: Full reset with `db:push` (for development)
+> **Warning:** This is a local-development command. It permanently removes all
+> existing users, sales, sale items, role-permission overrides, inventory,
+> products, categories, and branches before inserting the mock catalog.
 
-```bash
-# Push schema changes without migrations
-npm run -w backend db:push
+The editable fixture is `backend/prisma/seed-data.json`. It contains Khmer
+mock data for:
 
-# Clear and reseed
-npm run -w backend db:clear
-npm run -w backend db:seed
-```
+- Cambodia branch names and machine-readable branch codes
+- Branch-scoped categories
+- Products with Khmer names, prices, costs, SKUs, and barcodes
+- Inventory quantities and low-stock thresholds
 
-## Seed Data
-
-The seed script (`backend/prisma/seed.ts`) generates:
-
-- **3 branches** with Khmer/Cambodian retail context
-  - Phnom Penh Central (ACTIVE)
-  - Siem Reap Market (INACTIVE)
-  - Battambang Store (SUSPENDED)
-- **Users per branch**: 1 admin + 1–2 cashiers
-- **Categories**: 4–6 per branch (Cosmetics, Beverages, Food, Essentials, etc.)
-- **Products**: 6–11 per category with Khmer names
-- **Inventory**: stock quantities per product
-- **Sales**: 2–6 per branch with 1–4 items each
-- **Role permissions**: default permission matrix for all roles
-
-Seed data is defined in `backend/prisma/seed-data/seed.json`.
-
-To customize seed data, edit `backend/prisma/seed-data/seed.json` or modify the generators in `backend/prisma/seed.ts`.
+The seed script validates the fixture, including category references and unique
+branch codes/SKUs, before it deletes any database records. To customize the
+mock data, edit `backend/prisma/seed-data.json`, then rerun the seed command.
+It intentionally does not create users, passwords, role permissions, or sales.
 
 ---
 

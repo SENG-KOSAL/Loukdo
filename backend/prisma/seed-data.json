@@ -1,0 +1,184 @@
+{
+  "branches": [
+    {
+      "name": "សាខាភ្នំពេញ",
+      "code": "phnom-penh",
+      "status": "ACTIVE",
+      "categories": [
+        {
+          "key": "beverages",
+          "name": "ភេសជ្ជៈ",
+          "description": "ទឹក និងភេសជ្ជៈត្រជាក់"
+        },
+        {
+          "key": "snacks",
+          "name": "អាហារសម្រន់",
+          "description": "អាហារសម្រន់ប្រចាំថ្ងៃ"
+        },
+        {
+          "key": "household",
+          "name": "សម្ភារៈប្រើប្រាស់",
+          "description": "សម្ភារៈសម្រាប់ប្រើប្រាស់ក្នុងផ្ទះ"
+        }
+      ],
+      "products": [
+        {
+          "name": "ទឹកបរិសុទ្ធ 500ml",
+          "description": "ទឹកបរិសុទ្ធដប 500 មីលីលីត្រ",
+          "categoryKey": "beverages",
+          "price": 1500,
+          "cost": 900,
+          "sku": "PP-WATER-500",
+          "barcode": "885000000001",
+          "quantity": 120,
+          "minStock": 24
+        },
+        {
+          "name": "តែទឹកដោះគោ",
+          "description": "តែទឹកដោះគោកំប៉ុង",
+          "categoryKey": "beverages",
+          "price": 2500,
+          "cost": 1700,
+          "sku": "PP-MILK-TEA",
+          "barcode": "885000000002",
+          "quantity": 64,
+          "minStock": 12
+        },
+        {
+          "name": "នំប៉័ងផ្អែម",
+          "description": "នំប៉័ងផ្អែមកញ្ចប់",
+          "categoryKey": "snacks",
+          "price": 2000,
+          "cost": 1300,
+          "sku": "PP-SWEET-BREAD",
+          "barcode": "885000000003",
+          "quantity": 48,
+          "minStock": 10
+        },
+        {
+          "name": "មីកញ្ចប់",
+          "description": "មីកញ្ចប់រសជាតិសាច់គោ",
+          "categoryKey": "snacks",
+          "price": 1800,
+          "cost": 1200,
+          "sku": "PP-INSTANT-NOODLES",
+          "barcode": "885000000004",
+          "quantity": 96,
+          "minStock": 20
+        },
+        {
+          "name": "សាប៊ូលាងដៃ",
+          "description": "សាប៊ូលាងដៃដបតូច",
+          "categoryKey": "household",
+          "price": 3500,
+          "cost": 2400,
+          "sku": "PP-HAND-SOAP",
+          "barcode": "885000000005",
+          "quantity": 30,
+          "minStock": 8
+        },
+        {
+          "name": "ក្រដាសអនាម័យ",
+          "description": "ក្រដាសអនាម័យមួយកញ្ចប់",
+          "categoryKey": "household",
+          "price": 4500,
+          "cost": 3200,
+          "sku": "PP-TISSUE",
+          "barcode": "885000000006",
+          "quantity": 36,
+          "minStock": 8
+        }
+      ]
+    },
+    {
+      "name": "សាខាសៀមរាប",
+      "code": "siem-reap",
+      "status": "ACTIVE",
+      "categories": [
+        {
+          "key": "beverages",
+          "name": "ភេសជ្ជៈ",
+          "description": "ទឹក និងភេសជ្ជៈត្រជាក់"
+        },
+        {
+          "key": "snacks",
+          "name": "អាហារសម្រន់",
+          "description": "អាហារសម្រន់ប្រចាំថ្ងៃ"
+        },
+        {
+          "key": "household",
+          "name": "សម្ភារៈប្រើប្រាស់",
+          "description": "សម្ភារៈសម្រាប់ប្រើប្រាស់ក្នុងផ្ទះ"
+        }
+      ],
+      "products": [
+        {
+          "name": "ទឹកបរិសុទ្ធ 1.5L",
+          "description": "ទឹកបរិសុទ្ធដប 1.5 លីត្រ",
+          "categoryKey": "beverages",
+          "price": 2500,
+          "cost": 1600,
+          "sku": "SR-WATER-1500",
+          "barcode": "885000000101",
+          "quantity": 84,
+          "minStock": 18
+        },
+        {
+          "name": "កាហ្វេទឹកដោះគោ",
+          "description": "កាហ្វេទឹកដោះគោកំប៉ុង",
+          "categoryKey": "beverages",
+          "price": 3000,
+          "cost": 2100,
+          "sku": "SR-MILK-COFFEE",
+          "barcode": "885000000102",
+          "quantity": 52,
+          "minStock": 12
+        },
+        {
+          "name": "ដំឡូងបំពង",
+          "description": "ដំឡូងបំពងកញ្ចប់",
+          "categoryKey": "snacks",
+          "price": 2200,
+          "cost": 1500,
+          "sku": "SR-POTATO-CHIPS",
+          "barcode": "885000000103",
+          "quantity": 40,
+          "minStock": 10
+        },
+        {
+          "name": "ខូគី",
+          "description": "ខូគីប៊ឺកញ្ចប់",
+          "categoryKey": "snacks",
+          "price": 2800,
+          "cost": 1900,
+          "sku": "SR-COOKIES",
+          "barcode": "885000000104",
+          "quantity": 42,
+          "minStock": 10
+        },
+        {
+          "name": "ទឹកលាងចាន",
+          "description": "ទឹកលាងចានដប 500 មីលីលីត្រ",
+          "categoryKey": "household",
+          "price": 5000,
+          "cost": 3600,
+          "sku": "SR-DISH-SOAP",
+          "barcode": "885000000105",
+          "quantity": 24,
+          "minStock": 6
+        },
+        {
+          "name": "ថង់សំរាម",
+          "description": "ថង់សំរាមមួយកញ្ចប់",
+          "categoryKey": "household",
+          "price": 3000,
+          "cost": 2000,
+          "sku": "SR-GARBAGE-BAGS",
+          "barcode": "885000000106",
+          "quantity": 32,
+          "minStock": 8
+        }
+      ]
+    }
+  ]
+}

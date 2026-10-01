@@ -4,6 +4,12 @@
       "name": "សាខាភ្នំពេញ",
       "code": "phnom-penh",
       "status": "ACTIVE",
+      "admin": {
+        "name": "Phnom Penh Admin",
+        "username": "phnom-penh-admin",
+        "email": "phnom-penh-admin@demo.local",
+        "password": "demo12345"
+      },
       "categories": [
         {
           "key": "beverages",
@@ -94,6 +100,12 @@
       "name": "សាខាសៀមរាប",
       "code": "siem-reap",
       "status": "ACTIVE",
+      "admin": {
+        "name": "Siem Reap Admin",
+        "username": "siem-reap-admin",
+        "email": "siem-reap-admin@demo.local",
+        "password": "demo12345"
+      },
       "categories": [
         {
           "key": "beverages",

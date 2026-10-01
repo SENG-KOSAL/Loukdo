@@ -278,7 +278,20 @@ mock data for:
 The seed script validates the fixture, including category references and unique
 branch codes/SKUs, before it deletes any database records. To customize the
 mock data, edit `backend/prisma/seed-data.json`, then rerun the seed command.
-It intentionally does not create users, passwords, role permissions, or sales.
+
+Each fixture branch includes one development-only `BRANCH_ADMIN` account. Find
+the source credentials in that branch's `admin` object in
+`backend/prisma/seed-data.json`:
+
+| Branch code | Username | Password |
+| --- | --- | --- |
+| `phnom-penh` | `phnom-penh-admin` | `demo12345` |
+| `siem-reap` | `siem-reap-admin` | `demo12345` |
+
+The seed script hashes these passwords before storing them in the database.
+They are public local-development credentials only; never use them in a
+deployed environment. The seed intentionally does not create other users,
+role permissions, or sales.
 
 ---
 

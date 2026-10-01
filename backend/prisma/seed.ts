@@ -1,6 +1,14 @@
 import { z } from "zod"
 import prisma from "../src/services/prisma"
+import { hash } from "../src/services/password"
 import seedFixture from "./seed-data.json"
+
+const branchAdminSchema = z.object({
+  name: z.string().trim().min(1),
+  username: z.string().trim().min(1),
+  email: z.string().trim().email(),
+  password: z.string().min(8),
+}).strict()
 
 const categorySchema = z.object({
   key: z.string().trim().min(1).max(60),
@@ -28,6 +36,7 @@ const branchSchema = z.object({
   code: z.string().trim().min(1).max(20),
   url: z.string().url().optional(),
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]),
+  admin: branchAdminSchema,
   categories: z.array(categorySchema).min(1),
   products: z.array(productSchema).min(1),
 }).strict()
@@ -48,6 +57,8 @@ function assertUnique(values: string[], label: string) {
 function assertFixtureConsistency(data: SeedData) {
   assertUnique(data.branches.map((branch) => branch.name), "branch names")
   assertUnique(data.branches.map((branch) => branch.code), "branch codes")
+  assertUnique(data.branches.map((branch) => branch.admin.username), "branch-admin usernames")
+  assertUnique(data.branches.map((branch) => branch.admin.email), "branch-admin emails")
 
   for (const branch of data.branches) {
     assertUnique(branch.categories.map((category) => category.key), `category keys for ${branch.code}`)
@@ -81,7 +92,20 @@ async function seedDatabase(data: SeedData) {
           name: seedBranch.name,
           code: seedBranch.code,
           url: seedBranch.url ?? null,
+          adminName: seedBranch.admin.name,
+          adminEmail: seedBranch.admin.email,
           status: seedBranch.status,
+        },
+      })
+
+      await tx.user.create({
+        data: {
+          name: seedBranch.admin.name,
+          username: seedBranch.admin.username,
+          email: seedBranch.admin.email,
+          password: hash(seedBranch.admin.password),
+          role: "BRANCH_ADMIN",
+          branchId: branch.id,
         },
       })
 
@@ -133,7 +157,7 @@ async function main() {
 
   const categoryCount = data.branches.reduce((count, branch) => count + branch.categories.length, 0)
   const productCount = data.branches.reduce((count, branch) => count + branch.products.length, 0)
-  console.log(`Seeded ${data.branches.length} branches, ${categoryCount} categories, ${productCount} products, and ${productCount} inventory items.`)
+  console.log(`Seeded ${data.branches.length} branches, ${data.branches.length} branch-admin users, ${categoryCount} categories, ${productCount} products, and ${productCount} inventory items.`)
 }
 
 main()

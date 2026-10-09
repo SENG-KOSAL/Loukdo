@@ -88,9 +88,24 @@ const definition: SwaggerOptions["definition"] = {
       CreateSaleInput: {
         type: "object",
         properties: {
-          total: { type: "number", format: "double" },
+          items: {
+            type: "array",
+            minItems: 1,
+            items: {
+              type: "object",
+              properties: {
+                productId: { type: "string" },
+                quantity: { type: "integer", minimum: 1 },
+              },
+              required: ["productId", "quantity"],
+            },
+          },
+          branchId: {
+            type: "string",
+            description: "SUPER_ADMIN only. Other roles always sell in their own branch.",
+          },
         },
-        required: ["total"],
+        required: ["items"],
       },
       ExchangeRate: {
         type: "object",

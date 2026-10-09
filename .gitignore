@@ -13,7 +13,7 @@ build/
 *.log
 .DS_Store
 coverage/
-
+.opencode.json
 # Prisma
 backend/src/generated/
 prisma/migrations/

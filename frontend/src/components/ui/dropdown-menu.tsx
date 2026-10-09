@@ -27,10 +27,10 @@ export function DropdownMenuTrigger({ children, asChild = false }: { children: R
   if (!context) throw new Error("DropdownMenuTrigger must be used within a DropdownMenu")
 
   if (asChild) {
-    return React.cloneElement(children as React.ReactElement, {
+    return React.cloneElement(children as React.ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>, {
       onClick: (e: React.MouseEvent) => {
         context.setOpen(!context.open)
-        (children as any).props.onClick?.(e)
+        ;(children as any).props.onClick?.(e)
       },
     })
   }

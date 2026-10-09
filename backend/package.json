@@ -13,6 +13,7 @@
     "db:migrate": "dotenv -e ../.env -- prisma migrate dev",
     "db:studio": "dotenv -e ../.env -- prisma studio",
     "db:seed": "dotenv -e ../.env -- tsx prisma/seed.ts",
+    "db:clear": "dotenv -e ../.env -- tsx prisma/clear.ts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

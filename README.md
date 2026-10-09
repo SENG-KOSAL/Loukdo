@@ -256,6 +256,7 @@ To test endpoints with **"Try it out"**, log in first at `/login` (or a branch l
 | `db:migrate`    | Create and apply migration  |
 | `db:studio`     | Open Prisma Studio UI       |
 | `db:seed`       | Run seed script             |
+| `db:clear`      | Clear all data from tables  |
 | `lint`          | Type-check backend          |
 
 ### Frontend (`npm run -w frontend <command>`)
@@ -267,6 +268,49 @@ To test endpoints with **"Try it out"**, log in first at `/login` (or a branch l
 | `start`   | Start production server   |
 | `lint`    | Run Next.js lint          |
 
+
+after create new schema
+npm run -w backend db:push
+
+## Seed Mock Data
+
+Run the seed command after the schema exists:
+
+```bash
+npm run -w backend db:seed
+```
+
+> **Warning:** This is a local-development command. It permanently removes all
+> existing users, sales, sale items, role-permission overrides, inventory,
+> products, categories, and branches before inserting the mock catalog.
+
+The editable fixture is `backend/prisma/seed-data.json`. It contains Khmer
+mock data for:
+
+- Cambodia branch names and machine-readable branch codes
+- Branch-scoped categories
+- Products with Khmer names, prices, costs, SKUs, and barcodes
+- Inventory quantities and low-stock thresholds
+
+The seed script validates the fixture, including category references and unique
+branch codes/SKUs, before it deletes any database records. To customize the
+mock data, edit `backend/prisma/seed-data.json`, then rerun the seed command.
+
+Each fixture branch includes one development-only `BRANCH_ADMIN` account. Find
+the source credentials in that branch's `admin` object in
+`backend/prisma/seed-data.json`:
+
+| Branch code | Username | Password |
+| --- | --- | --- |
+| `phnom-penh` | `phnom-penh-admin` | `demo12345` |
+| `siem-reap` | `siem-reap-admin` | `demo12345` |
+
+The seed script hashes these passwords before storing them in the database.
+They are public local-development credentials only; never use them in a
+deployed environment. The seed intentionally does not create other users,
+role permissions, or sales.
+
+---
 
 after create new schema
 npm run -w backend db:push

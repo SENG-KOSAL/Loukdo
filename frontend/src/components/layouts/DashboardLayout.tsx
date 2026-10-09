@@ -88,7 +88,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className={cn("flex h-14 items-center border-b px-3", collapsed ? "justify-center" : "justify-between")}>
         {!collapsed && (
           <div className="flex items-center gap-2 min-w-0">
-            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-white text-xs font-bold">
               L
             </div>
             <div className="min-w-0">
@@ -98,7 +98,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         )}
         {collapsed && (
-          <div className="flex size-7 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-white text-xs font-bold">
             L
           </div>
         )}
@@ -157,11 +157,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </Button>
         </div>
         {collapsed ? (
-          <Button variant="ghost" size="icon" className="mt-1 size-7" onClick={() => setCollapsed(false)}>
+          <Button variant="ghost" size="icon" className="mt-1 size-7" onClick={toggleSidebar}>
             <ChevronRight className="size-3.5" />
           </Button>
         ) : (
-          <Button variant="ghost" size="icon" className="mt-1 w-full justify-center text-muted-foreground" onClick={() => setCollapsed(true)}>
+          <Button variant="ghost" size="icon" className="mt-1 w-full justify-center text-muted-foreground" onClick={toggleSidebar}>
             <ChevronLeft className="size-3.5" />
           </Button>
         )}
@@ -193,14 +193,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Mobile top bar */}
       <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background/80 backdrop-blur-sm px-4 lg:hidden">
-        <div className="flex size-7 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold shrink-0">
+        <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-white text-xs font-bold shrink-0">
           L
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold leading-tight">Loukdo Admin</p>
-          <p className="truncate text-[10px] text-muted-foreground leading-tight">
-            {currentItem?.label || "Dashboard"}
-          </p>
+          <p className="truncate text-sm font-semibold leading-tight">Loukdo</p>
+          <p className="truncate text-[10px] text-muted-foreground leading-tight uppercase tracking-wider">Admin</p>
         </div>
         <Button variant="ghost" size="icon" onClick={() => signOut()}>
           <LogOut className="size-4" />

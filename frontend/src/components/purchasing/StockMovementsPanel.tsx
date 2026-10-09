@@ -25,12 +25,13 @@ export function StockMovementsPanel(props: Props) {
   const load = useCallback(async () => {
     setLoading(true); setError("")
     try {
-      setMovements(await apiClient<StockMovementRow[]>("/v1/stock-movements"))
+      const endpoint = isAdmin ? "/v1/stock-movements" : "/v1/branch/stock-movements"
+      setMovements(await apiClient<StockMovementRow[]>(endpoint))
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load stock movements")
     }
     finally { setLoading(false) }
-  }, [])
+  }, [isAdmin])
   useEffect(() => { load() }, [load])
 
   return (

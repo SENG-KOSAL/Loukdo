@@ -26,6 +26,7 @@ type Props = {
   purchaseOrder: PurchaseOrderRow | null
   canManage: boolean
   showBranch?: boolean
+  stockMovementsEndpoint: string
   onEdit: (po: PurchaseOrderRow) => void
   onDelete: (po: PurchaseOrderRow) => void
   onMarkOrdered: (po: PurchaseOrderRow) => void
@@ -33,7 +34,7 @@ type Props = {
   onReceive: (po: PurchaseOrderRow) => void
 }
 
-export function PurchaseOrderDetailDialog({ open, onOpenChange, purchaseOrder: po, canManage, showBranch, onEdit, onDelete, onMarkOrdered, onCancel, onReceive }: Props) {
+export function PurchaseOrderDetailDialog({ open, onOpenChange, purchaseOrder: po, canManage, showBranch, stockMovementsEndpoint, onEdit, onDelete, onMarkOrdered, onCancel, onReceive }: Props) {
   const [movements, setMovements] = useState<Movement[]>([])
 
   const receivedTotal = po?.items.reduce((sum, i) => sum + i.receivedQuantity, 0) ?? 0
@@ -41,11 +42,11 @@ export function PurchaseOrderDetailDialog({ open, onOpenChange, purchaseOrder: p
   useEffect(() => {
     if (!open || !po) return
     let cancelled = false
-    apiClient<Movement[]>(`/v1/stock-movements?purchaseOrderId=${po.id}`)
+    apiClient<Movement[]>(`${stockMovementsEndpoint}?purchaseOrderId=${po.id}`)
       .then((rows) => { if (!cancelled) setMovements(rows) })
       .catch(() => { if (!cancelled) setMovements([]) })
     return () => { cancelled = true }
-  }, [open, po?.id, po?.status, receivedTotal]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, po?.id, po?.status, receivedTotal, stockMovementsEndpoint])
 
   if (!po) return null
 

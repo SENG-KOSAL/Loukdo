@@ -162,6 +162,7 @@ export function PurchaseOrdersPanel(props: Props) {
         purchaseOrder={selected}
         canManage={canManage}
         showBranch={isAdmin}
+        stockMovementsEndpoint={isAdmin ? "/v1/stock-movements" : "/v1/branch/stock-movements"}
         onEdit={(po) => { setDetailOpen(false); setEditing(po); setFormOpen(true) }}
         onDelete={remove}
         onMarkOrdered={(po) => changeStatus(po, "ORDERED")}

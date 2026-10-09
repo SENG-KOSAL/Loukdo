@@ -8,6 +8,8 @@ export const PERMISSIONS = [
   { key: "products.manage", label: "Manage products", description: "Create, edit, and delete products" },
   { key: "categories.manage", label: "Manage categories", description: "Create, edit, and delete categories" },
   { key: "inventory.manage", label: "Adjust inventory", description: "Adjust stock quantities and low-stock thresholds" },
+  { key: "vendors.manage", label: "Manage vendors", description: "View, create, edit, and delete vendors (suppliers)" },
+  { key: "purchaseOrders.manage", label: "Manage purchase orders", description: "Create, order, receive, and cancel purchase orders" },
   { key: "sales.view", label: "View sales", description: "View sales history and reports" },
   { key: "pos.access", label: "Access POS", description: "Use the point-of-sale checkout screen" },
   { key: "settings.manage", label: "Manage settings", description: "Change system settings and role permissions" },
@@ -21,21 +23,25 @@ const ALL_ROLES: Role[] = [ROLES.SUPER_ADMIN, ROLES.BRANCH_ADMIN, ROLES.MANAGER,
 // SUPER_ADMIN is always fully permitted and cannot be restricted.
 export const DEFAULT_PERMISSIONS: Record<Role, Record<PermissionKey, boolean>> = {
   SUPER_ADMIN: {
+    "vendors.manage": true, "purchaseOrders.manage": true,
     "branches.manage": true, "users.manage": true, "products.manage": true,
     "categories.manage": true, "inventory.manage": true, "sales.view": true,
     "pos.access": true, "settings.manage": true,
   },
   BRANCH_ADMIN: {
+    "vendors.manage": true, "purchaseOrders.manage": true,
     "branches.manage": false, "users.manage": true, "products.manage": true,
     "categories.manage": true, "inventory.manage": true, "sales.view": true,
     "pos.access": true, "settings.manage": false,
   },
   MANAGER: {
+    "vendors.manage": false, "purchaseOrders.manage": false,
     "branches.manage": false, "users.manage": false, "products.manage": true,
     "categories.manage": true, "inventory.manage": true, "sales.view": true,
     "pos.access": true, "settings.manage": false,
   },
   CASHIER: {
+    "vendors.manage": false, "purchaseOrders.manage": false,
     "branches.manage": false, "users.manage": false, "products.manage": false,
     "categories.manage": false, "inventory.manage": false, "sales.view": false,
     "pos.access": true, "settings.manage": false,

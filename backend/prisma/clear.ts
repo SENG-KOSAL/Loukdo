@@ -4,6 +4,10 @@ async function clear() {
   console.log("🧹 Clearing all data...")
 
   await prisma.$transaction([
+    prisma.stockMovement.deleteMany(),
+    prisma.purchaseOrderItem.deleteMany(),
+    prisma.purchaseOrder.deleteMany(),
+    prisma.vendor.deleteMany(),
     prisma.saleItem.deleteMany(),
     prisma.sale.deleteMany(),
     prisma.inventoryItem.deleteMany(),

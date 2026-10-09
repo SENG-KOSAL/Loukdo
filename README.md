@@ -255,6 +255,18 @@ To test endpoints with **"Try it out"**, log in first at `/login` (or a branch l
 after create new schema
 npm run -w backend db:push
 
+## Vendors & Purchase Orders
+
+Branch-scoped suppliers and stock ordering. Access requires the `vendors.manage` / `purchaseOrders.manage` permissions (on by default for `BRANCH_ADMIN`; `SUPER_ADMIN` always has them; grant to other roles in Settings → Role Permissions).
+
+- **Models:** `Vendor`, `PurchaseOrder`, `PurchaseOrderItem`, `StockMovement` (see `backend/prisma/schema.prisma`).
+- **Status flow:** `DRAFT` → `ORDERED` → `PARTIALLY_RECEIVED` → `RECEIVED`; `DRAFT`/`ORDERED` can be `CANCELLED`. Only drafts can be edited or deleted.
+- **Receiving stock** (`POST /api/v1/purchase-orders/:id/receive`) runs in one transaction: it increases inventory, records a `PURCHASE_RECEIPT` stock movement (with before/after quantities) per line, and updates the PO status. Product cost is not changed.
+- **API:** `/api/v1/vendors`, `/api/v1/purchase-orders` (+ `/:id`, `/:id/status`, `/:id/receive`), `/api/v1/stock-movements` (read-only).
+- **UI:** `/dashboard/admin/vendors`, `/dashboard/admin/purchase-orders`, `/branch/:code/vendors`, `/branch/:code/purchase-orders`.
+
+After pulling these changes run `npm run -w backend db:push` and `npm run -w backend db:generate`.
+
 ## Seed Mock Data
 
 Run the seed command after the schema exists:

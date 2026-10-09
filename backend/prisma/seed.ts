@@ -77,6 +77,10 @@ function assertFixtureConsistency(data: SeedData) {
 
 async function seedDatabase(data: SeedData) {
   await prisma.$transaction(async (tx) => {
+    await tx.stockMovement.deleteMany()
+    await tx.purchaseOrderItem.deleteMany()
+    await tx.purchaseOrder.deleteMany()
+    await tx.vendor.deleteMany()
     await tx.saleItem.deleteMany()
     await tx.sale.deleteMany()
     await tx.inventoryItem.deleteMany()

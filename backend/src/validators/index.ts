@@ -111,5 +111,79 @@ export const updateRolePermissionsSchema = z.object({
 
 export type UpdateRolePermissionsInput = z.infer<typeof updateRolePermissionsSchema>
 
+const optionalText = (max: number) => z.string().trim().max(max).nullable().optional()
+
+export const createVendorSchema = z.object({
+  name: z.string().trim().min(1, "Vendor name is required").max(150),
+  code: optionalText(50),
+  contactName: optionalText(100),
+  email: z.string().trim().email("A valid email is required").nullable().optional(),
+  phone: optionalText(50),
+  address: optionalText(300),
+  paymentTerms: optionalText(100),
+  notes: optionalText(1000),
+  active: z.boolean().optional(),
+  branchId: z.string().cuid().nullable().optional(),
+})
+
+export const updateVendorSchema = z.object({
+  name: z.string().trim().min(1, "Vendor name is required").max(150).optional(),
+  code: optionalText(50),
+  contactName: optionalText(100),
+  email: z.string().trim().email("A valid email is required").nullable().optional(),
+  phone: optionalText(50),
+  address: optionalText(300),
+  paymentTerms: optionalText(100),
+  notes: optionalText(1000),
+  active: z.boolean().optional(),
+}).refine((value) => Object.keys(value).length > 0, "At least one field is required")
+
+export type CreateVendorInput = z.infer<typeof createVendorSchema>
+export type UpdateVendorInput = z.infer<typeof updateVendorSchema>
+
+const dateString = z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Invalid date")
+
+const purchaseOrderItemSchema = z.object({
+  productId: z.string().cuid(),
+  quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
+  unitCost: z.coerce.number().min(0, "Unit cost must be 0 or more"),
+})
+
+export const createPurchaseOrderSchema = z.object({
+  vendorId: z.string().cuid("A vendor is required"),
+  branchId: z.string().cuid().nullable().optional(),
+  expectedDate: dateString.nullable().optional(),
+  tax: z.coerce.number().min(0).optional(),
+  shipping: z.coerce.number().min(0).optional(),
+  notes: optionalText(1000),
+  items: z.array(purchaseOrderItemSchema).min(1, "Add at least one item").max(200),
+})
+
+export const updatePurchaseOrderSchema = z.object({
+  vendorId: z.string().cuid().optional(),
+  expectedDate: dateString.nullable().optional(),
+  tax: z.coerce.number().min(0).optional(),
+  shipping: z.coerce.number().min(0).optional(),
+  notes: optionalText(1000),
+  items: z.array(purchaseOrderItemSchema).min(1, "Add at least one item").max(200).optional(),
+}).refine((value) => Object.keys(value).length > 0, "At least one field is required")
+
+export const updatePurchaseOrderStatusSchema = z.object({
+  status: z.enum(["ORDERED", "CANCELLED"]),
+})
+
+export const receivePurchaseOrderSchema = z.object({
+  items: z.array(z.object({
+    itemId: z.string().cuid(),
+    quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
+  })).min(1, "Enter a received quantity for at least one item"),
+  note: optionalText(500),
+})
+
+export type CreatePurchaseOrderInput = z.infer<typeof createPurchaseOrderSchema>
+export type UpdatePurchaseOrderInput = z.infer<typeof updatePurchaseOrderSchema>
+export type UpdatePurchaseOrderStatusInput = z.infer<typeof updatePurchaseOrderStatusSchema>
+export type ReceivePurchaseOrderInput = z.infer<typeof receivePurchaseOrderSchema>
+
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>

@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd frontend && npm run build",
+  "buildCommand": "cd backend && npx prisma generate && cd ../frontend && npm run build",
   "outputDirectory": "frontend/.next",
   "installCommand": "npm install",
   "framework": "nextjs"

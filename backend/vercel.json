@@ -1,0 +1,14 @@
+{
+  "framework": null,
+  "installCommand": "cd .. && npm install",
+  "buildCommand": "npx prisma generate --schema=./prisma/schema.prisma",
+  "outputDirectory": "public",
+  "functions": {
+    "api/**/*.ts": {
+      "includeFiles": "src/generated/prisma/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/health", "destination": "/api/health" }
+  ]
+}

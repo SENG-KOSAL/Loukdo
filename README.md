@@ -150,18 +150,35 @@ psql postgres -c "CREATE DATABASE loukdo OWNER loukdo;"
 
 ### 3. Set environment variables
 
-The `.env` file at the project root is pre-configured:
+Copy `.env.example` to `.env` at the project root, then replace its placeholder
+values. Both the frontend development server and the backend Prisma commands
+load this shared file; do not create separate environment files inside the
+workspaces.
 
 ```env
-DATABASE_URL="postgresql://loukdo:112233@localhost:5432/loukdo?schema=public"
-AUTH_SECRET="1QAqagR0rQGtrgN0UIQyfRLi+GHqHHpZoRWQz4KtltA="
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/loukdo?schema=public"
+AUTH_SECRET="<a-random-secret>"
+AUTH_URL="http://localhost:3000"
+NODE_ENV="development"
 ```
 
-To generate a new `AUTH_SECRET` (optional):
+`AUTH_SECRET` is not supplied by Auth.js or a third party. Generate it once,
+then store it in the root `.env` file:
 
 ```bash
 openssl rand -base64 32
 ```
+
+On Windows, you can generate the same value with Node.js:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+Copy the generated value into `AUTH_SECRET`. To find the configured secret
+later, check the `AUTH_SECRET=` entry in the root `.env` file. Keep `.env`
+private and never commit or share this value. Replacing it invalidates active
+login sessions.
 
 ### 4. Generate Prisma client & apply migrations
 

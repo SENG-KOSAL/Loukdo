@@ -10,6 +10,8 @@ export type PermissionKey =
   | "products.manage"
   | "categories.manage"
   | "inventory.manage"
+  | "vendors.manage"
+  | "purchaseOrders.manage"
   | "sales.view"
   | "pos.access"
   | "settings.manage"

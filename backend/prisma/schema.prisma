@@ -17,6 +17,8 @@ model User {
   role      Role     @default(CASHIER)
   branchId  String?
   branch    Branch?  @relation(fields: [branchId], references: [id])
+  purchaseOrders PurchaseOrder[]
+  stockMovements StockMovement[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -33,6 +35,9 @@ model Branch {
   sales      Sale[]
   products   Product[]
   categories Category[]
+  vendors    Vendor[]
+  purchaseOrders PurchaseOrder[]
+  stockMovements StockMovement[]
   inventory  InventoryItem[]
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
@@ -54,6 +59,8 @@ model Product {
   branch      Branch          @relation(fields: [branchId], references: [id])
   inventory   InventoryItem[]
   saleItems   SaleItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+  stockMovements StockMovement[]
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
@@ -137,6 +144,112 @@ enum BranchStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
+}
+
+model Vendor {
+  id             String          @id @default(cuid())
+  name           String
+  code           String?
+  contactName    String?
+  email          String?
+  phone          String?
+  address        String?
+  paymentTerms   String?
+  notes          String?
+  active         Boolean         @default(true)
+  branchId       String
+  branch         Branch          @relation(fields: [branchId], references: [id])
+  purchaseOrders PurchaseOrder[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([name, branchId])
+}
+
+model PurchaseOrder {
+  id             String              @id @default(cuid())
+  poNumber       String
+  status         PurchaseOrderStatus @default(DRAFT)
+  orderDate      DateTime            @default(now())
+  expectedDate   DateTime?
+  receivedAt     DateTime?
+  subtotal       Decimal             @default(0)
+  tax            Decimal             @default(0)
+  shipping       Decimal             @default(0)
+  total          Decimal             @default(0)
+  notes          String?
+  vendorId       String
+  vendor         Vendor              @relation(fields: [vendorId], references: [id])
+  branchId       String
+  branch         Branch              @relation(fields: [branchId], references: [id])
+  createdById    String?
+  createdBy      User?               @relation(fields: [createdById], references: [id])
+  items          PurchaseOrderItem[]
+  stockMovements StockMovement[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@unique([poNumber, branchId])
+}
+
+model PurchaseOrderItem {
+  id               String          @id @default(cuid())
+  quantity         Int             @default(1)
+  receivedQuantity Int             @default(0)
+  unitCost         Decimal         @default(0)
+  total            Decimal         @default(0)
+  purchaseOrderId  String
+  purchaseOrder    PurchaseOrder   @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product         @relation(fields: [productId], references: [id])
+  stockMovements   StockMovement[]
+
+  @@unique([purchaseOrderId, productId])
+}
+
+model StockMovement {
+  id                  String             @id @default(cuid())
+  type                StockMovementType
+  status              StockMovementStatus @default(COMPLETED)
+  quantity            Int
+  quantityBefore      Int
+  quantityAfter       Int
+  note                String?
+  productId           String
+  product             Product            @relation(fields: [productId], references: [id])
+  branchId            String
+  branch              Branch             @relation(fields: [branchId], references: [id])
+  purchaseOrderId     String?
+  purchaseOrder       PurchaseOrder?     @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrderItemId String?
+  purchaseOrderItem   PurchaseOrderItem? @relation(fields: [purchaseOrderItemId], references: [id])
+  createdById         String?
+  createdBy           User?              @relation(fields: [createdById], references: [id])
+  createdAt           DateTime           @default(now())
+
+  @@index([branchId, createdAt])
+  @@index([productId])
+  @@index([purchaseOrderId])
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  ORDERED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum StockMovementType {
+  PURCHASE_RECEIPT
+  PURCHASE_ORDER_STATUS
+}
+
+enum StockMovementStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REVERSED
 }
 
 enum SaleStatus {

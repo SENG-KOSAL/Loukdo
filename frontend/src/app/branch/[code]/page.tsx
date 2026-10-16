@@ -13,10 +13,10 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 const modules = [
-  { label: "POS", icon: ShoppingCart, href: "/pos", desc: "Sell products & process orders", color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
-  { label: "Products", icon: Package, href: "/products", desc: "Manage product catalog", color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
-  { label: "Categories", icon: Tags, href: "/categories", desc: "Organize product groups", color: "text-violet-600", bg: "bg-violet-50 dark:bg-violet-950/30" },
-  { label: "Sales", icon: History, href: "/sales", desc: "View transaction history", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
+  { label: "POS", icon: ShoppingCart, href: "/pos", desc: "Sell products & process orders", color: "text-teal-600", bg: "bg-teal-50 dark:bg-teal-950/30" },
+  { label: "Products", icon: Package, href: "/products", desc: "Manage product catalog", color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
+  { label: "Categories", icon: Tags, href: "/categories", desc: "Organize product groups", color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
+  { label: "Sales", icon: History, href: "/sales", desc: "View transaction history", color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
   { label: "Users", icon: Users, href: "/users", desc: "Manage cashiers & staff", color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30" },
   { label: "Inventory", icon: Boxes, href: "/inventory", desc: "Track stock levels", color: "text-cyan-600", bg: "bg-cyan-50 dark:bg-cyan-950/30" },
   { label: "Settings", icon: Settings, href: "/settings", desc: "Tax, receipt & store config", color: "text-slate-600", bg: "bg-slate-50 dark:bg-slate-950/30" },
@@ -49,8 +49,8 @@ export default function BranchDashboardPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Branch Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="font-display text-2xl font-bold tracking-tight">Branch Dashboard</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Overview and quick access to all branch modules
             </p>
           </div>
@@ -71,7 +71,7 @@ export default function BranchDashboardPage() {
               <p className="text-2xl font-bold">$0.00</p>
               <p className="text-xs text-muted-foreground">No transactions yet</p>
             </div>
-            <div className="rounded-lg bg-emerald-50 p-2.5 text-emerald-600 dark:bg-emerald-950/30">
+            <div className="rounded-lg bg-teal-50 p-2.5 text-teal-600 dark:bg-teal-950/30">
               <Receipt className="size-5" />
             </div>
           </div>
@@ -83,7 +83,7 @@ export default function BranchDashboardPage() {
               <p className="text-2xl font-bold">0</p>
               <p className="text-xs text-muted-foreground">Today</p>
             </div>
-            <div className="rounded-lg bg-blue-50 p-2.5 text-blue-600 dark:bg-blue-950/30">
+            <div className="rounded-lg bg-amber-50 p-2.5 text-amber-600 dark:bg-amber-950/30">
               <TrendingUp className="size-5" />
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function BranchDashboardPage() {
               <p className="text-2xl font-bold">&mdash;</p>
               <p className="text-xs text-muted-foreground">In catalog</p>
             </div>
-            <div className="rounded-lg bg-amber-50 p-2.5 text-amber-600 dark:bg-amber-950/30">
+            <div className="rounded-lg bg-indigo-50 p-2.5 text-indigo-600 dark:bg-indigo-950/30">
               <Package className="size-5" />
             </div>
           </div>
@@ -107,14 +107,14 @@ export default function BranchDashboardPage() {
               <p className="text-2xl font-bold">&mdash;</p>
               <p className="text-xs text-muted-foreground">Active users</p>
             </div>
-            <div className="rounded-lg bg-violet-50 p-2.5 text-violet-600 dark:bg-violet-950/30">
+            <div className="rounded-lg bg-rose-50 p-2.5 text-rose-600 dark:bg-rose-950/30">
               <Users className="size-5" />
             </div>
           </div>
         </Card>
       </div>
 
-      <h2 className="text-base font-semibold mb-4">Modules</h2>
+      <h2 className="font-display text-base font-semibold mb-4">Modules</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {modules.map((m) => {
           const Icon = m.icon
@@ -138,5 +138,4 @@ export default function BranchDashboardPage() {
     </BranchLayout>
   )
 }
-
 

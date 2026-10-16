@@ -244,12 +244,12 @@ export default function BranchesPage() {
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
               <Building2 className="size-3" /> Branch Network
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Branches Management</h1>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground">Branches Management</h1>
             <p className="text-sm text-muted-foreground max-w-xl">
               Configure, duplicate, and monitor branch locations, manage store subdomains, and provision secure admin accounts for your retail network.
             </p>
           </div>
-          <Button onClick={() => setOpen(true)} size="lg" className="shadow-md shrink-0 self-start md:self-auto gap-2">
+          <Button onClick={() => setOpen(true)} size="lg" className="shadow-sm shrink-0 self-start md:self-auto gap-2">
             <Plus className="size-4" /> New Branch Location
           </Button>
         </div>

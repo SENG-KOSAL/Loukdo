@@ -55,69 +55,94 @@ export default function BranchLoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 via-green-50 to-teal-100 px-4 dark:from-emerald-950 dark:via-green-950 dark:to-teal-900">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.08),transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top_right,rgba(16,185,129,0.15),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(5,150,105,0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_at_bottom_left,rgba(5,150,105,0.1),transparent_50%)]" />
+    <div className="relative flex min-h-screen">
+      {/* Left side — brand panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 text-white flex-col justify-between p-12 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-teal-600/20 via-slate-900 to-slate-900" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
 
-      <div className="absolute left-4 top-4 sm:left-8 sm:top-8">
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="size-4" />
-          Back to admin login
-        </Link>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-teal-500 text-white">
+              <Store className="size-5" />
+            </div>
+            <span className="font-display text-xl font-bold tracking-tight">Loukdo</span>
+          </div>
+        </div>
+
+        <div className="relative z-10 max-w-md">
+          <h1 className="font-display text-4xl font-bold leading-tight tracking-tight mb-4">
+            {branch ? (
+              <>Welcome to <span className="text-teal-400">{branch.name}</span></>
+            ) : (
+              <>Branch <span className="text-teal-400">access</span></>
+            )}
+          </h1>
+          <p className="text-slate-400 text-lg leading-relaxed">
+            {branch
+              ? `Sign in to process sales, manage inventory, and serve customers at ${branch.name}.`
+              : "Sign in to process sales and manage your branch operations."}
+          </p>
+        </div>
+
+        <div className="relative z-10">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="size-4" />
+            Back to admin login
+          </Link>
+        </div>
       </div>
 
-      <Card className="relative w-full max-w-sm shadow-xl shadow-emerald-500/5 dark:shadow-emerald-500/10">
-        <CardHeader className="space-y-1 pb-6 text-center">
-          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-emerald-600 shadow-sm dark:bg-emerald-500">
-            <Store className="size-6 text-white" />
+      {/* Right side — login form */}
+      <div className="flex flex-1 items-center justify-center bg-background px-4 py-12">
+        <div className="w-full max-w-sm">
+          <div className="lg:hidden mb-8 flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <Store className="size-5" />
+            </div>
+            <span className="font-display text-xl font-bold tracking-tight">Loukdo</span>
           </div>
-          {branchLoading ? (
-            <>
-              <CardTitle className="text-xl font-semibold tracking-tight">Loading...</CardTitle>
-              <CardDescription className="text-sm">Fetching branch details</CardDescription>
-            </>
-          ) : branch ? (
-            <>
-              <CardTitle className="text-xl font-semibold tracking-tight">{branch.name}</CardTitle>
-              <CardDescription className="text-sm">
-                Sign in with your branch account
+
+          <Card className="border-0 shadow-none bg-transparent">
+            <CardHeader className="space-y-1 pb-6 px-0">
+              <CardTitle className="font-display text-2xl font-bold tracking-tight">
+                {branchLoading ? "Loading..." : branch ? branch.name : "Branch Unavailable"}
+              </CardTitle>
+              <CardDescription className="text-base">
+                {branchLoading ? "Fetching branch details" : branch ? "Sign in with your branch account" : "This branch could not be found or is not accessible"}
               </CardDescription>
-            </>
-          ) : (
-            <>
-              <CardTitle className="text-xl font-semibold tracking-tight text-destructive">Branch Unavailable</CardTitle>
-              <CardDescription className="text-sm">This branch could not be found or is not accessible</CardDescription>
-            </>
-          )}
-        </CardHeader>
-        <CardContent>
-          {branchLoading ? (
-            <div className="flex justify-center py-4">
-              <Loader2 className="size-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : branch ? (
-            <LoginForm
-              onSubmit={handleLogin}
-              isLoading={loading}
-              errorMessage={error}
-              placeholderUsername="Enter your branch username"
-            />
-          ) : error ? (
-            <div className="flex flex-col items-center gap-3 py-4 text-center">
-              <div className="rounded-full bg-destructive/10 p-3">
-                <AlertCircle className="size-8 text-destructive" />
-              </div>
-              <p className="text-sm text-muted-foreground">{error}</p>
-              <Button variant="outline" size="sm" onClick={() => router.push("/login")}>
-                Go to Admin Login
-              </Button>
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
+            </CardHeader>
+            <CardContent className="px-0">
+              {branchLoading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : branch ? (
+                <LoginForm
+                  onSubmit={handleLogin}
+                  isLoading={loading}
+                  errorMessage={error}
+                  placeholderUsername="Enter your branch username"
+                />
+              ) : error ? (
+                <div className="flex flex-col items-center gap-3 py-4 text-center">
+                  <div className="rounded-full bg-destructive/10 p-3">
+                    <AlertCircle className="size-8 text-destructive" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">{error}</p>
+                  <Button variant="outline" size="sm" onClick={() => router.push("/login")}>
+                    Go to Admin Login
+                  </Button>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }

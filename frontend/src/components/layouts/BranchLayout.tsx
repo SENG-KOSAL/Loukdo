@@ -6,7 +6,7 @@ import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
 import {
   LayoutDashboard, ShoppingCart, Package, Tags, History,
-  Users, Boxes, Settings, LogOut, Store, ChevronLeft, ChevronRight,
+  Users, Boxes, Settings, LogOut, Store, ChevronLeft, ChevronRight, Truck, ClipboardList,
   Menu,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -14,8 +14,9 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { usePermissions, type PermissionKey } from "@/hooks/usePermissions"
 
-const navItems = [
+const navItems: { label: string; icon: React.ComponentType<{ className?: string }>; href: string; permission?: PermissionKey }[] = [
   { label: "Dashboard", icon: LayoutDashboard, href: "" },
   { label: "POS", icon: ShoppingCart, href: "/pos" },
   { label: "Products", icon: Package, href: "/products" },
@@ -23,6 +24,9 @@ const navItems = [
   { label: "Sales", icon: History, href: "/sales" },
   { label: "Users", icon: Users, href: "/users" },
   { label: "Inventory", icon: Boxes, href: "/inventory" },
+  { label: "Vendors", icon: Truck, href: "/vendors", permission: "vendors.manage" },
+  { label: "Purchase Orders", icon: ClipboardList, href: "/purchase-orders", permission: "purchaseOrders.manage" },
+  { label: "Stock Movements", icon: ClipboardList, href: "/stock-movements", permission: "purchaseOrders.manage" },
   { label: "Settings", icon: Settings, href: "/settings" },
 ]
 
@@ -35,6 +39,8 @@ export default function BranchLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname()
   const branchCode = params.code as string
   const { data: session } = useSession()
+  const { can } = usePermissions()
+  const visibleNavItems = navItems.filter((item) => !item.permission || can(item.permission))
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [branch, setBranch] = useState<{ name: string } | null>(null)
@@ -58,7 +64,7 @@ export default function BranchLayout({ children }: { children: React.ReactNode }
       <div className={cn("flex h-14 items-center border-b px-3", collapsed ? "justify-center" : "justify-between")}>
         {!collapsed && (
           <div className="flex items-center gap-2 min-w-0">
-            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white text-xs font-bold">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-white text-xs font-bold">
               L
             </div>
             <div className="min-w-0">
@@ -68,14 +74,14 @@ export default function BranchLayout({ children }: { children: React.ReactNode }
           </div>
         )}
         {collapsed && (
-          <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-600 text-white text-xs font-bold">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-white text-xs font-bold">
             L
           </div>
         )}
       </div>
 
       <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.href)
           return (
@@ -152,7 +158,7 @@ export default function BranchLayout({ children }: { children: React.ReactNode }
 
       {/* Mobile top bar */}
       <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b bg-background/80 backdrop-blur-sm px-4 lg:hidden">
-        <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-600 text-white text-xs font-bold shrink-0">
+        <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-white text-xs font-bold shrink-0">
           L
         </div>
         <div className="min-w-0 flex-1">

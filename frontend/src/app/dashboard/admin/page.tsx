@@ -37,23 +37,29 @@ interface Branch {
 }
 
 const statusConfig = {
-  ACTIVE: { label: "Active", variant: "default" as const, dot: "bg-green-500" },
-  INACTIVE: { label: "Inactive", variant: "secondary" as const, dot: "bg-gray-400" },
+  ACTIVE: { label: "Active", variant: "default" as const, dot: "bg-emerald-500" },
+  INACTIVE: { label: "Inactive", variant: "secondary" as const, dot: "bg-slate-400" },
   SUSPENDED: { label: "Suspended", variant: "destructive" as const, dot: "bg-red-500" },
 }
 
-function StatCard({ icon, label, value, sublabel }: {
-  icon: React.ReactNode; label: string; value: string | number; sublabel?: string
+function StatCard({ icon, label, value, sublabel, accent }: {
+  icon: React.ReactNode; label: string; value: string | number; sublabel?: string; accent?: "teal" | "amber" | "emerald" | "slate"
 }) {
+  const accentMap = {
+    teal: "bg-teal-500/10 text-teal-600 dark:text-teal-400",
+    amber: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    emerald: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    slate: "bg-slate-500/10 text-slate-600 dark:text-slate-400",
+  }
   return (
-    <Card className="relative overflow-hidden p-5 transition-all hover:shadow-md">
+    <Card className="relative overflow-hidden p-5 transition-all hover:shadow-md hover:border-primary/20">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <p className="text-3xl font-bold tracking-tight">{value}</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+          <p className="text-3xl font-bold tracking-tight font-display">{value}</p>
           {sublabel && <p className="text-xs text-muted-foreground">{sublabel}</p>}
         </div>
-        <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+        <div className={cn("rounded-lg p-2.5", accentMap[accent || "slate"])}>
           {icon}
         </div>
       </div>
@@ -123,10 +129,10 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="mb-6">
+      <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+            <h1 className="font-display text-3xl font-bold tracking-tight">Dashboard</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Overview of your branch network
             </p>
@@ -157,24 +163,28 @@ export default function AdminDashboard() {
           label="Total Branches"
           value={loading ? "\u2014" : totalBranches}
           sublabel="Across all locations"
+          accent="teal"
         />
         <StatCard
           icon={<ShieldCheck className="size-5" />}
           label="Active"
           value={loading ? "\u2014" : activeBranches}
           sublabel={`${inactiveBranches} inactive or suspended`}
+          accent="emerald"
         />
         <StatCard
           icon={<Users className="size-5" />}
           label="Total Users"
           value={loading ? "\u2014" : totalUsers}
           sublabel="Branch admins & staff"
+          accent="amber"
         />
         <StatCard
           icon={<Activity className="size-5" />}
           label="Uptime"
           value={loading || totalBranches === 0 ? "\u2014" : `${Math.round((activeBranches / totalBranches) * 100)}%`}
           sublabel={activeBranches > 0 ? `${activeBranches}/${totalBranches} operational` : undefined}
+          accent="slate"
         />
       </div>
 
@@ -224,7 +234,7 @@ export default function AdminDashboard() {
                       </p>
                       <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
                         {TrendIcon && (
-                          <TrendIcon className={cn("size-3", isUp ? "text-green-500" : "text-red-500")} />
+                          <TrendIcon className={cn("size-3", isUp ? "text-emerald-500" : "text-red-500")} />
                         )}
                         {r.unit > 1 ? `per ${r.unit} units` : ""}
                       </div>
@@ -299,7 +309,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 gap-3">
               <Link href="/dashboard/admin/branches" className="contents">
                 <Button variant="outline" className="flex-col gap-2 py-5 h-auto">
-                  <div className="rounded-lg bg-blue-50 p-2 text-blue-600 dark:bg-blue-950/30">
+                  <div className="rounded-lg bg-teal-50 p-2 text-teal-600 dark:bg-teal-950/30">
                     <Plus className="size-4" />
                   </div>
                   <span className="text-xs font-medium">New Branch</span>
@@ -307,7 +317,7 @@ export default function AdminDashboard() {
               </Link>
               <Link href="/dashboard/admin/branches" className="contents">
                 <Button variant="outline" className="flex-col gap-2 py-5 h-auto">
-                  <div className="rounded-lg bg-violet-50 p-2 text-violet-600 dark:bg-violet-950/30">
+                  <div className="rounded-lg bg-primary/10 p-2 text-primary">
                     <Store className="size-4" />
                   </div>
                   <span className="text-xs font-medium">All Branches</span>
@@ -315,14 +325,14 @@ export default function AdminDashboard() {
               </Link>
               <Link href="/dashboard/admin/users" className="contents">
                 <Button variant="outline" className="flex-col gap-2 py-5 h-auto">
-                  <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-950/30">
+                  <div className="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-950/30">
                     <Users className="size-4" />
                   </div>
                   <span className="text-xs font-medium">Users</span>
                 </Button>
               </Link>
               <Button variant="outline" className="flex-col gap-2 py-5 h-auto" disabled>
-                <div className="rounded-lg bg-amber-50 p-2 text-amber-600 dark:bg-amber-950/30">
+                <div className="rounded-lg bg-slate-100 p-2 text-slate-600 dark:bg-slate-800">
                   <Activity className="size-4" />
                 </div>
                 <span className="text-xs font-medium">Reports</span>

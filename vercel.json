@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run -w frontend build",
+  "buildCommand": "npm run -w backend db:generate && npm run -w frontend build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "framework": "nextjs"
